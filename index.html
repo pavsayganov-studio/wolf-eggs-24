@@ -4,784 +4,431 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Волк ловит яйца — Pavel Game Studio</title>
-<meta name="description" content="Классическая советская аркада в браузере">
-<meta property="og:title" content="Волк ловит яйца — Pavel Game Studio">
-<meta property="og:description" content="Классическая советская аркада в браузере">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230066A1'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='%232FC7F7' text-anchor='middle'>P</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════════
-   ДИЗАЙН-СИСТЕМА: Битрикс24-стиль
-   ──────────────────────────────────────────
-   Фирменные цвета Pavel:
-   #2FC7F7 — голубой (Pantone 306C)
-   #0066A1 — тёмно-синий (Pantone 7462C)
-   #CFCFD2 — светло-серый (Pantone 427C)
-   #292426 — чёрный (Neutral Black C)
-
-   Стиль: насыщенный синий фон, жёлто-зелёная
-   CTA-кнопка, стеклянный хедер, белый текст
-   ══════════════════════════════════════════ */
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Фирменные */
-  --cyan:  #2FC7F7;
-  --blue:  #0066A1;
-  --gray:  #CFCFD2;
-  --black: #292426;
-
-  /* Стиль Битрикс24 — насыщенный синий */
-  --bg:          #1565FF;   /* яркий королевский синий — доминирующий фон */
-  --bg-deep:     #0E4FD8;   /* чуть темнее для глубины */
-  --bg-darker:   #0840C0;   /* самый тёмный синий */
-
-  /* Лайм — CTA кнопка (как жёлто-зелёная на изображении) */
   --lime:        #D4F01A;
   --lime-hover:  #BFDA10;
-
-  /* Стекло — как навбар на изображении */
   --glass-nav:   rgba(255,255,255,0.18);
   --glass-card:  rgba(255,255,255,0.12);
-  --glass-border: rgba(255,255,255,0.25);
-
-  /* Текст */
+  --glass-border:rgba(255,255,255,0.25);
   --text-white:  #FFFFFF;
   --text-dim:    rgba(255,255,255,0.7);
   --text-muted:  rgba(255,255,255,0.45);
-
-  /* Статус */
-  --error: #FF3B5C;
-
-  --r8:  8px;
-  --r12: 12px;
-  --r16: 16px;
-  --r24: 24px;
-  --r999: 999px;
+  --error:       #FF3B5C;
+  --black:       #292426;
 }
 
-html, body {
+/* ── BASE ── */
+html { height: 100%; }
+body {
   height: 100%;
   font-family: 'Inter', sans-serif;
-  background: var(--bg);
   color: var(--text-white);
-  user-select: none;
-  -webkit-user-select: none;
+  user-select: none; -webkit-user-select: none;
+  display: flex; flex-direction: column; align-items: center;
   overflow: hidden;
-}
-
-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
-  /* Насыщенный синий с лёгкими вариациями — как на скрине */
-  background: radial-gradient(ellipse 100% 70% at 50% 0%,   #1e75ff 0%, transparent 70%),
-              radial-gradient(ellipse 80%  60% at 100% 50%, #0e4fd8 0%, transparent 65%),
-              radial-gradient(ellipse 70%  50% at 0%  80%,  #0840c0 0%, transparent 60%),
-              #1565FF;
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 0%,   #1e75ff 0%, transparent 70%),
+    radial-gradient(ellipse 80%  60% at 100% 50%,  #0e4fd8 0%, transparent 65%),
+    radial-gradient(ellipse 70%  50% at 0%   80%,  #0840c0 0%, transparent 60%),
+    #1565FF;
   background-attachment: fixed;
 }
 
-/* ══════════════════════════════════════════
-   ХЕДЕР-ЛОГОТИП — стеклянный навбар как на скрине
-   ══════════════════════════════════════════ */
+/* ── NAVBAR ── */
 .logo {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 560px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  /* Стекло — точно как navBar Битрикс24 */
+  width: 100%; max-width: 560px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
   background: var(--glass-nav);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--glass-border);
-  border-radius: 0 0 var(--r16) var(--r16);
-  flex-shrink: 0;
+  border-radius: 0 0 14px 14px;
+  flex-shrink: 0; z-index: 10;
 }
-
 .logo-text {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--text-white);
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 1.25rem; font-weight: 800; color: var(--text-white);
+  letter-spacing: -0.02em; display: flex; align-items: center; gap: 6px;
 }
-
 .logo-dot {
-  display: inline-block;
-  width: 8px; height: 8px;
-  background: var(--lime);
-  border-radius: 50%;
+  display: inline-block; width: 7px; height: 7px;
+  background: var(--lime); border-radius: 50%;
   animation: dotBlink 2s ease-in-out infinite;
 }
 @keyframes dotBlink {
-  0%,100% { opacity: 1; transform: scale(1); }
-  50%     { opacity: 0.6; transform: scale(0.8); }
+  0%,100% { opacity:1; transform:scale(1); }
+  50%     { opacity:0.5; transform:scale(0.75); }
 }
-
 .logo-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--black);
-  background: var(--lime);
-  padding: 3px 10px;
-  border-radius: var(--r999);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
+  font-size: 0.6rem; font-weight: 800; color: var(--black);
+  background: var(--lime); padding: 3px 9px; border-radius: 999px;
+  letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
   transition: all 0.2s;
 }
-.logo-badge:hover {
-  background: var(--lime-hover);
-  transform: scale(1.04);
-}
+.logo-badge:hover { background: var(--lime-hover); transform: scale(1.04); }
 
-/* ══════════════════════════════════════════
-   ЭКРАНЫ
-   ══════════════════════════════════════════ */
+/* ── SCREENS ── */
 .screen {
-  display: none;
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 560px;
-  padding: 0 16px 24px;
+  display: none; position: relative; z-index: 1;
+  width: 100%; max-width: 560px;
+  padding: 0 14px 16px;
   animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
-  flex: 1;
+  /* Use available height after navbar */
+  flex: 1; min-height: 0; overflow-y: auto;
 }
 .screen.active { display: flex; flex-direction: column; }
-
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
 }
 
-/* ══════════════════════════════════════════
-   МЕНЮ — крупная типографика, как на скрине
-   ══════════════════════════════════════════ */
-.menu-hero {
-  text-align: center;
-  padding: 28px 0 20px;
-  flex: 1;
-}
-
+/* ── MENU ── */
+.menu-hero { text-align: center; padding: 18px 0 14px; }
 .menu-title {
-  font-size: clamp(1.8rem, 7vw, 2.6rem);
-  font-weight: 900;
-  color: var(--text-white);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 8px;
-  /* Белый жирный текст как на скрине Битрикс24 */
+  font-size: clamp(1.5rem, 6vw, 2.4rem); font-weight: 900;
+  color: var(--text-white); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 6px;
 }
-
 .menu-subtitle {
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--text-dim);
-  margin-bottom: 28px;
-  font-style: italic;
+  font-size: 0.9rem; font-weight: 400;
+  color: var(--text-dim); margin-bottom: 18px; font-style: italic;
 }
 
-/* ── Кнопки меню ── */
+/* ── BUTTONS ── */
 .btn {
-  display: block;
-  width: 100%;
-  border: none;
-  border-radius: var(--r999);
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  display: block; width: 100%; border: none; border-radius: 999px;
+  font-family: 'Inter', sans-serif; font-weight: 800; cursor: pointer;
+  transition: all 0.2s ease; position: relative; overflow: hidden;
+  letter-spacing: 0.04em; text-transform: uppercase;
 }
 .btn:active { transform: scale(0.95) !important; }
 
-/* CTA — лаймовая, точно как на скрине */
 .btn-lime {
-  padding: 16px 32px;
-  font-size: 1rem;
-  color: var(--black);
-  background: var(--lime);
-  box-shadow: 0 4px 24px rgba(212,240,26,0.35);
-  margin-bottom: 12px;
+  padding: 14px 28px; font-size: 0.95rem; color: var(--black);
+  background: var(--lime); box-shadow: 0 4px 24px rgba(212,240,26,0.35);
+  margin-bottom: 10px;
 }
-.btn-lime:hover {
-  background: var(--lime-hover);
-  transform: scale(1.03);
-  box-shadow: 0 8px 32px rgba(212,240,26,0.5);
-}
+.btn-lime:hover { background: var(--lime-hover); transform: scale(1.03); box-shadow: 0 8px 32px rgba(212,240,26,0.5); }
 
-/* Стеклянная кнопка */
 .btn-glass {
-  padding: 14px 32px;
-  font-size: 0.9rem;
-  color: var(--text-white);
-  background: var(--glass-card);
-  border: 1.5px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  margin-bottom: 12px;
+  padding: 12px 28px; font-size: 0.88rem; color: var(--text-white);
+  background: var(--glass-card); border: 1.5px solid var(--glass-border);
+  backdrop-filter: blur(12px); margin-bottom: 10px;
 }
-.btn-glass:hover {
-  background: rgba(255,255,255,0.2);
-  transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(255,255,255,0.15);
-}
+.btn-glass:hover { background: rgba(255,255,255,0.2); transform: scale(1.02); }
 
-/* Белая обводка */
 .btn-outline {
-  padding: 12px 28px;
-  font-size: 0.85rem;
-  color: var(--text-white);
-  background: transparent;
-  border: 1.5px solid var(--glass-border);
-  margin-bottom: 10px;
+  padding: 11px 24px; font-size: 0.82rem; color: var(--text-white);
+  background: transparent; border: 1.5px solid var(--glass-border); margin-bottom: 8px;
 }
-.btn-outline:hover {
-  background: rgba(255,255,255,0.1);
-  transform: scale(1.02);
-}
+.btn-outline:hover { background: rgba(255,255,255,0.1); transform: scale(1.02); }
 
-/* Красная */
-.btn-red {
-  padding: 12px 28px;
-  font-size: 0.85rem;
-  color: var(--text-white);
-  background: rgba(255,59,92,0.85);
-  border: 1px solid rgba(255,59,92,0.5);
-  margin-bottom: 10px;
-}
-.btn-red:hover { background: rgba(255,59,92,1); transform: scale(1.02); }
-
-/* ── Карточки меню ── */
+/* ── CARDS ── */
 .card-glass {
-  background: var(--glass-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r16);
-  padding: 16px 18px;
-  margin-bottom: 12px;
+  background: var(--glass-card); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
 }
-
 .hs-card { text-align: center; }
-.hs-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-.hs-value {
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: var(--lime);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 20px rgba(212,240,26,0.4);
-}
+.hs-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 4px; }
+.hs-value { font-size: 2.4rem; font-weight: 900; color: var(--lime); line-height: 1; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(212,240,26,0.4); }
 
-.ctrl-card h3 {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-.ctrl-section {
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin: 10px 0 8px;
-}
-.ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
-.ctrl-item {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 0.82rem; color: var(--text-dim); font-weight: 500;
-}
+.ctrl-card h3 { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+.ctrl-section { font-size: 0.68rem; color: var(--text-dim); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 8px 0 6px; }
+.ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 4px; }
+.ctrl-item { display: flex; align-items: center; gap: 9px; font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
 .key {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px;
-  background: rgba(255,255,255,0.15);
-  border: 1.5px solid rgba(255,255,255,0.35);
-  border-radius: 7px;
-  font-size: 1rem; font-weight: 800; color: var(--text-white);
-  flex-shrink: 0;
+  width: 30px; height: 30px; background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.35); border-radius: 6px;
+  font-size: 0.95rem; font-weight: 800; color: var(--text-white); flex-shrink: 0;
 }
-.ctrl-note {
-  font-size: 0.74rem; color: var(--text-muted);
-  margin-top: 6px; line-height: 1.7;
-}
+.ctrl-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; line-height: 1.65; }
+.footer { text-align: center; color: var(--text-muted); font-size: 0.68rem; margin-top: 10px; }
 
-.footer {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  margin-top: 12px;
-  padding-bottom: 4px;
+/* ════════════════════════════════════════
+   ИГРОВОЙ ЭКРАН — всё в одном flex-column,
+   поле занимает оставшееся место
+   ════════════════════════════════════════ */
+#screen-game {
+  padding: 0; max-width: 560px;
+  /* критично: запрещаем скролл игрового экрана */
+  overflow: hidden;
 }
 
-/* ══════════════════════════════════════════
-   ИГРОВОЙ ЭКРАН
-   ══════════════════════════════════════════ */
-#screen-game { padding: 0; max-width: 560px; }
-
-/* Хедер игры — стеклянная полоска как навбар скрина */
+/* Хедер */
 .game-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: var(--glass-nav);
-  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--glass-nav); backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--glass-border);
   flex-shrink: 0;
 }
-
-.score-block {}
-.score-label {
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
+.score-label { font-size: 0.52rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; }
 .score-value {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--lime);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 14px rgba(212,240,26,0.4);
+  font-size: 1.8rem; font-weight: 900; color: var(--lime); line-height: 1;
+  letter-spacing: -0.02em; text-shadow: 0 0 14px rgba(212,240,26,0.4);
 }
 .score-value.bounce { animation: scoreBounce 0.28s ease; }
-@keyframes scoreBounce {
-  0%   { transform: scale(1); }
-  45%  { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
-
-.header-center { display: flex; align-items: center; gap: 8px; }
-
+@keyframes scoreBounce { 0%{transform:scale(1)} 45%{transform:scale(1.3)} 100%{transform:scale(1)} }
+.header-center { display: flex; align-items: center; gap: 7px; }
 .mode-badge {
-  font-size: 0.6rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: var(--r999);
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: var(--text-white);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.58rem; font-weight: 800; padding: 3px 9px; border-radius: 999px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: var(--text-white); letter-spacing: 0.08em; text-transform: uppercase;
 }
-
 .sound-btn {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: var(--r8);
-  color: var(--text-white);
-  cursor: pointer; padding: 5px 9px; font-size: 0.95rem;
-  transition: all 0.2s; line-height: 1;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 7px; color: var(--text-white); cursor: pointer;
+  padding: 4px 8px; font-size: 0.9rem; transition: all 0.2s; line-height: 1;
 }
 .sound-btn:hover { background: rgba(255,255,255,0.25); }
-
-.lives-block { display: flex; gap: 6px; align-items: center; }
-.life-icon {
-  font-size: 1.35rem; transition: all 0.3s ease;
-  filter: drop-shadow(0 0 6px rgba(212,240,26,0.4));
-}
+.lives-block { display: flex; gap: 5px; align-items: center; }
+.life-icon { font-size: 1.25rem; transition: all 0.3s ease; filter: drop-shadow(0 0 5px rgba(212,240,26,0.4)); }
 .life-icon.lost { filter: grayscale(1) opacity(0.2); transform: scale(0.72); }
 
-/* ══════════════════════════════════════════
-   ИГРОВОЕ ПОЛЕ — яркий синий как фон скрина
-   ══════════════════════════════════════════ */
+/* ── GAME FIELD ── */
 #game-field {
   position: relative; width: 100%;
-  /* Насыщенный синий — как фон изображения */
   background: linear-gradient(180deg, #1055e8 0%, #0e4fd8 60%, #0840c0 100%);
   overflow: hidden;
   border-left: 1px solid rgba(255,255,255,0.1);
   border-right: 1px solid rgba(255,255,255,0.1);
-  flex: 1;
+  /* flex-grow fills remaining space between header and controls */
+  flex: 1; min-height: 0;
 }
 
-/* Декоративные круги — как «пушистые» шары на скрине */
+/* Декоративный орб */
 #game-field::before {
-  content: '';
-  position: absolute;
-  width: 260px; height: 260px;
-  border-radius: 50%;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(47,199,247,0.18) 0%, rgba(0,102,161,0.08) 50%, transparent 70%);
+  content: ''; position: absolute;
+  width: 220px; height: 220px; border-radius: 50%;
+  left: 50%; top: 48%; transform: translate(-50%,-50%);
+  background: radial-gradient(circle, rgba(47,199,247,0.14) 0%, transparent 70%);
   pointer-events: none; z-index: 0;
   animation: orb 6s ease-in-out infinite alternate;
 }
-@keyframes orb {
-  0%   { transform: translate(-50%,-50%) scale(1); opacity: 0.7; }
-  100% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
-}
-
-/* Декоративное левое свечение */
-#game-field::after {
-  content: '';
-  position: absolute;
-  width: 180px; height: 180px;
-  border-radius: 50%;
-  left: -40px; top: 20%;
-  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
-  pointer-events: none; z-index: 0;
-}
+@keyframes orb { 0%{transform:translate(-50%,-50%)scale(1);opacity:0.7} 100%{transform:translate(-50%,-50%)scale(1.12);opacity:1} }
 
 .field-inner { position: relative; width: 100%; height: 100%; }
 
 /* Курицы */
 .chicken {
-  position: absolute; font-size: 1.9rem; z-index: 10;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  position: absolute; font-size: 1.7rem; z-index: 10;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35));
   transition: transform 0.15s;
 }
 .chicken.lay { animation: chickenLay 0.38s ease; }
 @keyframes chickenLay {
-  0%   { transform: scale(1) rotate(0deg); }
-  35%  { transform: scale(1.35) rotate(-18deg); }
-  70%  { transform: scale(1.1) rotate(10deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0%{transform:scale(1)rotate(0)} 35%{transform:scale(1.3)rotate(-16deg)}
+  70%{transform:scale(1.1)rotate(8deg)} 100%{transform:scale(1)rotate(0)}
 }
 
-/* Жёлоба — полупрозрачные белые линии */
+/* Жёлоба — плавные, не острые */
 .lane {
   position: absolute; transform-origin: 0 50%;
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.32);
   border-radius: 4px;
   box-shadow: 0 0 8px rgba(255,255,255,0.08);
 }
 
 /* Яйца */
 .egg {
-  position: absolute; font-size: 1.45rem; z-index: 20; pointer-events: none;
+  position: absolute; font-size: 1.35rem; z-index: 20; pointer-events: none;
   transition: left 0.38s cubic-bezier(0.4,0,0.2,1), top 0.38s cubic-bezier(0.4,0,0.2,1);
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
 }
-
-/* Поимка — лаймовая вспышка */
 .egg.caught { animation: eggCaught 0.42s ease forwards; }
 @keyframes eggCaught {
-  0%   { transform: scale(1); opacity: 1; }
-  40%  { transform: scale(1.9); filter: drop-shadow(0 0 20px rgba(212,240,26,0.95)) brightness(2.5); }
-  100% { transform: scale(0); opacity: 0; }
+  0%  { transform:scale(1); opacity:1; }
+  40% { transform:scale(1.8); filter:drop-shadow(0 0 18px rgba(212,240,26,0.95))brightness(2.5); }
+  100%{ transform:scale(0); opacity:0; }
 }
-
-/* Разбитие — красная вспышка */
 .egg.broken { animation: eggBroken 0.5s ease forwards; }
 @keyframes eggBroken {
-  0%   { transform: scale(1) rotate(0deg); opacity: 1; }
-  35%  { transform: scale(1.5) rotate(22deg); filter: drop-shadow(0 0 18px rgba(255,59,92,0.9)); }
-  100% { transform: scale(0.4) rotate(50deg); opacity: 0; }
+  0%  { transform:scale(1)rotate(0); opacity:1; }
+  35% { transform:scale(1.4)rotate(22deg); filter:drop-shadow(0 0 16px rgba(255,59,92,0.9)); }
+  100%{ transform:scale(0.4)rotate(50deg); opacity:0; }
 }
 
-/* Волк */
+/* ══ ВОЛК «НУ, ПОГОДИ» ══
+   SVG-персонаж: серый волк в белой рубашке
+   с корзиной. Рисуем inline через data-uri.   */
 #wolf {
-  position: absolute; z-index: 30; text-align: center; pointer-events: none;
+  position: absolute; z-index: 30; pointer-events: none;
   transition: left 0.13s cubic-bezier(0.34,1.4,0.64,1), top 0.13s cubic-bezier(0.34,1.4,0.64,1);
-}
-.wolf-emoji {
-  font-size: 2rem; display: block;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
-}
-.wolf-basket {
-  font-size: 1.1rem; display: block; margin-top: -5px;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  width: 52px; /* ширина SVG */
 }
 
 /* Splat */
 .splat {
-  position: absolute; font-size: 1.1rem; z-index: 15; pointer-events: none;
+  position: absolute; font-size: 1rem; z-index: 15; pointer-events: none;
   animation: splatAnim 0.9s ease forwards;
 }
 @keyframes splatAnim {
-  0%   { transform: scale(0.4); opacity: 1; }
-  35%  { transform: scale(1.6); opacity: 1; }
-  100% { transform: scale(1.1); opacity: 0; }
+  0%  { transform:scale(0.4); opacity:1; }
+  35% { transform:scale(1.5); opacity:1; }
+  100%{ transform:scale(1.1); opacity:0; }
 }
 
-/* ══════════════════════════════════════════
-   НИЖНЕЕ УПРАВЛЕНИЕ
-   ══════════════════════════════════════════ */
+/* ── CONTROLS ── */
 .game-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: var(--glass-nav);
-  backdrop-filter: blur(20px);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+  background: var(--glass-nav); backdrop-filter: blur(20px);
   border-top: 1px solid var(--glass-border);
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 6px; flex-shrink: 0;
 }
 
-.dpad { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.dpad { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 
 .touch-btn {
-  width: 60px; height: 54px;
+  width: 56px; height: 50px;
   background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.25);
-  border-radius: var(--r12);
-  font-size: 1.35rem; cursor: pointer;
-  transition: all 0.18s ease;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  color: var(--text-white); gap: 2px;
-  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.25); border-radius: 11px;
+  font-size: 1.25rem; cursor: pointer; transition: all 0.18s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text-white); gap: 1px; backdrop-filter: blur(8px);
 }
-.touch-btn:active { transform: scale(0.85) !important; }
-.touch-btn:hover {
-  background: rgba(255,255,255,0.22);
-  border-color: rgba(255,255,255,0.5);
-  transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-/* Активная позиция — лаймовая обводка */
+.touch-btn:active { transform: scale(0.84) !important; }
+.touch-btn:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.5); transform: scale(1.05); }
 .touch-btn.active-pos {
-  background: rgba(212,240,26,0.2);
-  border-color: var(--lime);
-  box-shadow: 0 0 18px rgba(212,240,26,0.5);
-  filter: brightness(1.2);
+  background: rgba(212,240,26,0.2); border-color: var(--lime);
+  box-shadow: 0 0 16px rgba(212,240,26,0.5); filter: brightness(1.2);
 }
+.touch-btn-icon  { font-size: 1.2rem; line-height: 1; }
+.touch-btn-label { font-size: 0.42rem; color: rgba(255,255,255,0.58); font-weight: 700; letter-spacing: 0.04em; }
 
-.touch-btn-icon  { font-size: 1.3rem; line-height: 1; }
-.touch-btn-label {
-  font-size: 0.46rem;
-  color: rgba(255,255,255,0.6);
-  font-weight: 700; letter-spacing: 0.04em;
-}
-
-/* Пауза */
 .pause-btn {
-  background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.25);
-  border-radius: var(--r12);
-  color: var(--text-white);
-  cursor: pointer; padding: 0 12px; font-size: 1.1rem;
-  transition: all 0.18s; height: 54px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 2px;
+  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 11px; color: var(--text-white); cursor: pointer;
+  padding: 0 10px; font-size: 1rem; transition: all 0.18s; height: 50px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   backdrop-filter: blur(8px);
 }
-.pause-btn:hover {
-  background: rgba(255,255,255,0.22);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-.pause-btn-label {
-  font-size: 0.46rem; color: rgba(255,255,255,0.5);
-  font-weight: 700; letter-spacing: 0.05em;
-}
+.pause-btn:hover { background: rgba(255,255,255,0.22); }
+.pause-btn-label { font-size: 0.42rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.05em; }
 
-/* Клавиатурный хинт */
-.kb-hint { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.kb-row  { display: flex; gap: 3px; }
+.kb-hint { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.kb-row  { display: flex; gap: 2px; }
 .kb-key {
-  width: 26px; height: 26px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.28);
-  border-radius: 5px;
+  width: 23px; height: 23px; background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.28); border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.82rem; color: rgba(255,255,255,0.8); font-weight: 700;
+  font-size: 0.78rem; color: rgba(255,255,255,0.75); font-weight: 700;
 }
-.kb-hint-label {
-  font-size: 0.48rem; color: rgba(255,255,255,0.4);
-  margin-top: 3px; text-align: center;
-  letter-spacing: 0.06em; font-weight: 700;
-}
+.kb-hint-label { font-size: 0.44rem; color: rgba(255,255,255,0.38); margin-top: 2px; text-align: center; letter-spacing: 0.06em; font-weight: 700; }
 
-/* ══════════════════════════════════════════
-   ОВЕРЛЕИ
-   ══════════════════════════════════════════ */
+/* ── OVERLAYS ── */
 .overlay {
   position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(14,60,180,0.7);
+  background: rgba(14,60,180,0.72);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   animation: fadeIn 0.25s ease;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-/* Модал — стеклянная карточка */
 .modal {
   background: rgba(255,255,255,0.14);
   backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border: 1.5px solid rgba(255,255,255,0.3);
-  border-radius: var(--r24);
-  padding: 36px 32px; text-align: center;
-  max-width: 350px; width: 90%;
-  box-shadow:
-    0 24px 64px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255,255,255,0.3); border-radius: 22px;
+  padding: 30px 28px; text-align: center; max-width: 340px; width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
   animation: modalPop 0.42s cubic-bezier(0.34,1.56,0.64,1);
 }
-@keyframes modalPop {
-  from { transform: scale(0.8) translateY(16px); opacity: 0; }
-  to   { transform: scale(1) translateY(0); opacity: 1; }
-}
+@keyframes modalPop { from{transform:scale(0.8)translateY(16px);opacity:0} to{transform:scale(1)translateY(0);opacity:1} }
 
-.modal-title-go {
-  font-size: 1.5rem; font-weight: 900;
-  color: var(--text-white);
-  margin-bottom: 6px;
-  letter-spacing: -0.01em;
-}
-.modal-title-pause {
-  font-size: 2rem; font-weight: 900;
-  color: var(--text-white);
-  margin-bottom: 24px;
-  letter-spacing: -0.02em;
-}
-
-.modal-score-label {
-  font-size: 0.65rem; font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 0.22em; text-transform: uppercase;
-  margin-bottom: 4px;
-}
+.modal-title-go   { font-size: 1.4rem; font-weight: 900; color: var(--text-white); margin-bottom: 6px; letter-spacing: -0.01em; }
+.modal-title-pause{ font-size: 2rem; font-weight: 900; color: var(--text-white); margin-bottom: 22px; letter-spacing: -0.02em; }
+.modal-score-label{ font-size: 0.62rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 4px; }
 .modal-score {
-  font-size: 3.5rem; font-weight: 900;
-  color: var(--lime);
-  text-shadow: 0 0 24px rgba(212,240,26,0.5);
-  letter-spacing: -0.03em; line-height: 1;
-  margin-bottom: 8px;
+  font-size: 3.2rem; font-weight: 900; color: var(--lime);
+  text-shadow: 0 0 24px rgba(212,240,26,0.5); letter-spacing: -0.03em; line-height: 1; margin-bottom: 8px;
   animation: countIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
 }
-@keyframes countIn {
-  from { transform: scale(0.5); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-
-.modal-hs { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 22px; }
-
-/* Новый рекорд — лаймовый бейдж */
+@keyframes countIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+.modal-hs { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 20px; }
 .new-record-badge {
-  font-size: 0.85rem; font-weight: 800;
-  color: var(--black);
-  background: var(--lime);
-  border-radius: var(--r999);
-  padding: 5px 18px; margin-bottom: 14px;
-  display: inline-block;
+  font-size: 0.82rem; font-weight: 800; color: var(--black); background: var(--lime);
+  border-radius: 999px; padding: 4px 16px; margin-bottom: 12px; display: inline-block;
   text-transform: uppercase; letter-spacing: 0.06em;
   animation: recordPop 0.5s 0.2s both cubic-bezier(0.34,1.56,0.64,1), limePulse 1.5s 0.7s ease-in-out infinite alternate;
 }
-@keyframes recordPop {
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-@keyframes limePulse {
-  0%   { box-shadow: 0 0 8px rgba(212,240,26,0.4); }
-  100% { box-shadow: 0 0 22px rgba(212,240,26,0.85); }
-}
+@keyframes recordPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+@keyframes limePulse { 0%{box-shadow:0 0 8px rgba(212,240,26,0.4)} 100%{box-shadow:0 0 22px rgba(212,240,26,0.85)} }
 
-/* ══════════════════════════════════════════
-   АНИМАЦИИ ПРОМАХОВ
-   ══════════════════════════════════════════ */
+/* ── АНИМАЦИИ ── */
 .shake { animation: shake 0.32s ease; }
 @keyframes shake {
-  0%,100% { transform: translateX(0); }
-  15%  { transform: translateX(-9px); }
-  30%  { transform: translateX(9px); }
-  45%  { transform: translateX(-6px); }
-  65%  { transform: translateX(6px); }
-  82%  { transform: translateX(-3px); }
+  0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)}
+  45%{transform:translateX(-5px)} 65%{transform:translateX(5px)} 82%{transform:translateX(-3px)}
 }
-
 .flash-red { animation: flashRed 0.42s ease; }
 @keyframes flashRed {
-  0%,100% { box-shadow: none; }
-  50% {
-    box-shadow:
-      inset 0 0 70px rgba(255,59,92,0.55),
-      0 0 40px rgba(255,59,92,0.2);
-  }
+  0%,100%{ box-shadow:none }
+  50%{ box-shadow:inset 0 0 70px rgba(255,59,92,0.55), 0 0 40px rgba(255,59,92,0.2) }
 }
-
-/* ══════════════════════════════════════════
-   ПАСХАЛКА
-   ══════════════════════════════════════════ */
 .easter-msg {
-  position: fixed; top: 38%; left: 50%;
-  transform: translate(-50%,-50%);
-  font-size: 1.8rem; font-weight: 900;
-  color: var(--lime);
-  text-shadow: 0 0 30px rgba(212,240,26,0.85);
-  z-index: 300;
-  animation: easterPop 2.1s ease forwards;
-  pointer-events: none; letter-spacing: -0.01em;
+  position: fixed; top: 38%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 1.7rem; font-weight: 900; color: var(--lime);
+  text-shadow: 0 0 30px rgba(212,240,26,0.85); z-index: 300;
+  animation: easterPop 2.1s ease forwards; pointer-events: none;
 }
 @keyframes easterPop {
-  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0; }
-  18%  { transform: translate(-50%,-60%) scale(1.15); opacity: 1; }
-  72%  { transform: translate(-50%,-60%) scale(1); opacity: 1; }
-  100% { transform: translate(-50%,-80%) scale(0.8); opacity: 0; }
+  0%  { transform:translate(-50%,-50%)scale(0); opacity:0; }
+  18% { transform:translate(-50%,-60%)scale(1.15); opacity:1; }
+  72% { transform:translate(-50%,-60%)scale(1); opacity:1; }
+  100%{ transform:translate(-50%,-80%)scale(0.8); opacity:0; }
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-   ══════════════════════════════════════════ */
-@media (hover: hover) and (pointer: fine) {
-  .dpad { opacity: 0.6; transition: opacity 0.2s; }
-  .dpad:hover { opacity: 1; }
+/* ── RESPONSIVE ── */
+@media (hover:hover) and (pointer:fine) {
+  .dpad { opacity:0.6; transition:opacity 0.2s; }
+  .dpad:hover { opacity:1; }
 }
-@media (hover: none) and (pointer: coarse) {
-  .kb-hint { display: none; }
-  .dpad { opacity: 1; }
+@media (hover:none) and (pointer:coarse) {
+  .kb-hint { display:none; }
+  .dpad { opacity:1; }
 }
-
-@media (max-width: 420px) {
-  .menu-title { font-size: 1.6rem; }
-  .logo-text  { font-size: 1.1rem; }
-  .touch-btn  { width: 52px; height: 48px; font-size: 1.2rem; }
-  .chicken    { font-size: 1.5rem; }
-  .wolf-emoji { font-size: 1.7rem; }
+/* Очень маленькие экраны */
+@media (max-height: 640px) {
+  .game-header { padding: 5px 12px; }
+  .score-value { font-size: 1.5rem; }
+  .game-controls { padding: 5px 10px; }
+  .touch-btn { width: 50px; height: 44px; font-size: 1.1rem; }
+  .pause-btn { height: 44px; }
+  .logo { padding: 5px 12px; }
+  .logo-text { font-size: 1.1rem; }
+}
+@media (max-width: 380px) {
+  .touch-btn { width: 48px; height: 44px; font-size: 1.1rem; }
+  .logo-text { font-size: 1.05rem; }
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════ ХЕДЕР-ЛОГОТИП (стеклянный навбар) ══════════ -->
+<!-- NAVBAR -->
 <div class="logo">
-  <div class="logo-text">
-    Pavel<span class="logo-dot"></span>
-  </div>
-  <div class="logo-badge" onclick="UI && UI.showMenu && UI.showMenu()">Game Studio</div>
+  <div class="logo-text">Pavel<span class="logo-dot"></span></div>
+  <div class="logo-badge" onclick="typeof UI !== 'undefined' && UI.showMenu()">Game Studio</div>
 </div>
 
-<!-- ══════════ МЕНЮ ══════════ -->
+<!-- ══ МЕНЮ ══ -->
 <div id="screen-menu" class="screen active">
   <div class="menu-hero">
     <div class="menu-title">Волк ловит яйца</div>
-    <div class="menu-subtitle">Классическая аркада</div>
+    <div class="menu-subtitle">Классическая аркада · Ну, погоди!</div>
   </div>
 
-  <button class="btn btn-lime" onclick="Game.start('A')">Игра A — Нормально</button>
+  <button class="btn btn-lime"  onclick="Game.start('A')">Игра A — Нормально</button>
   <button class="btn btn-glass" onclick="Game.start('B')">Игра B — Сложно ⚡</button>
 
-  <div class="card-glass hs-card" style="margin-bottom:12px;">
+  <div class="card-glass hs-card">
     <div class="hs-label">🏆 Рекорд</div>
     <div class="hs-value" id="menu-highscore">000</div>
   </div>
@@ -795,20 +442,18 @@ body {
       <div class="ctrl-item"><span class="key">↑</span> Верхний жёлоб</div>
       <div class="ctrl-item"><span class="key">↓</span> Нижний жёлоб</div>
     </div>
-    <div class="ctrl-note">
-      ← + ↑ = лево-верх &nbsp;·&nbsp; ← + ↓ = лево-низ<br>
-      → + ↑ = право-верх &nbsp;·&nbsp; → + ↓ = право-низ
-    </div>
-    <div class="ctrl-section" style="margin-top:14px;">📱 Мобильный — кнопки ↖ ↙ ↗ ↘</div>
-    <div class="ctrl-note">4 кнопки внизу экрана = 4 позиции волка</div>
+    <div class="ctrl-note">← + ↑ = лево-верх · ← + ↓ = лево-низ<br>→ + ↑ = право-верх · → + ↓ = право-низ</div>
+    <div class="ctrl-section" style="margin-top:12px;">📱 Мобильный — кнопки ↖ ↙ ↗ ↘</div>
+    <div class="ctrl-note">4 кнопки = 4 позиции волка</div>
   </div>
 
   <div class="footer">© 2025 Pavel Game Studio</div>
 </div>
 
-<!-- ══════════ ИГРА ══════════ -->
+<!-- ══ ИГРА ══ -->
 <div id="screen-game" class="screen">
 
+  <!-- Хедер -->
   <div class="game-header">
     <div class="score-block">
       <div class="score-label">Счёт</div>
@@ -825,44 +470,101 @@ body {
     </div>
   </div>
 
+  <!-- Поле -->
   <div id="game-field">
     <div class="field-inner" id="field-inner">
       <div class="chicken" id="chicken-0">🐔</div>
       <div class="chicken" id="chicken-1">🐔</div>
       <div class="chicken" id="chicken-2">🐔</div>
       <div class="chicken" id="chicken-3">🐔</div>
+
+      <!-- Волк «Ну, погоди» — SVG персонаж -->
       <div id="wolf">
-        <span class="wolf-emoji">🐺</span>
-        <span class="wolf-basket">🧺</span>
+        <svg width="52" height="68" viewBox="0 0 52 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Тело — белая рубашка -->
+          <rect x="13" y="30" width="26" height="28" rx="5" fill="#FFFFFF"/>
+          <!-- Полосы на рубашке — серые -->
+          <rect x="13" y="36" width="26" height="3" rx="1" fill="#D0D0D0"/>
+          <rect x="13" y="43" width="26" height="3" rx="1" fill="#D0D0D0"/>
+          <!-- Штаны — тёмно-синие -->
+          <rect x="13" y="52" width="11" height="16" rx="3" fill="#1a3a8a"/>
+          <rect x="28" y="52" width="11" height="16" rx="3" fill="#1a3a8a"/>
+          <!-- Ноги / обувь — чёрные -->
+          <rect x="11" y="62" width="14" height="6" rx="3" fill="#222"/>
+          <rect x="27" y="62" width="14" height="6" rx="3" fill="#222"/>
+          <!-- Шея -->
+          <rect x="22" y="25" width="8" height="8" rx="2" fill="#8A8A8A"/>
+          <!-- Голова — серая -->
+          <ellipse cx="26" cy="18" rx="14" ry="13" fill="#8A8A8A"/>
+          <!-- Морда (светлее) -->
+          <ellipse cx="26" cy="22" rx="8" ry="6" fill="#AFAFAF"/>
+          <!-- Уши -->
+          <polygon points="12,8 8,0 18,6" fill="#8A8A8A"/>
+          <polygon points="40,8 44,0 34,6" fill="#8A8A8A"/>
+          <!-- Уши внутри (розовые) -->
+          <polygon points="13,7 10,2 17,6" fill="#D08080"/>
+          <polygon points="39,7 42,2 35,6" fill="#D08080"/>
+          <!-- Глаза -->
+          <ellipse cx="20" cy="16" rx="3.5" ry="3.5" fill="white"/>
+          <ellipse cx="32" cy="16" rx="3.5" ry="3.5" fill="white"/>
+          <circle cx="21" cy="16" r="2" fill="#222"/>
+          <circle cx="33" cy="16" r="2" fill="#222"/>
+          <!-- Блеск глаз -->
+          <circle cx="22" cy="15" r="0.8" fill="white"/>
+          <circle cx="34" cy="15" r="0.8" fill="white"/>
+          <!-- Нос -->
+          <ellipse cx="26" cy="22" rx="3" ry="2" fill="#555"/>
+          <!-- Рот — ухмылка -->
+          <path d="M21 26 Q26 30 31 26" stroke="#555" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <!-- Сигарета -->
+          <rect x="30" y="25" width="12" height="3" rx="1.5" fill="#f5f5dc"/>
+          <rect x="40" y="25" width="4" height="3" rx="1" fill="#FF6633"/>
+          <!-- Дымок -->
+          <path d="M42 24 Q44 20 42 17 Q40 14 42 11" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <!-- Руки -->
+          <rect x="2" y="32" width="13" height="7" rx="3.5" fill="#8A8A8A"/>
+          <rect x="37" y="32" width="13" height="7" rx="3.5" fill="#8A8A8A"/>
+          <!-- Корзина — правая рука держит -->
+          <rect x="36" y="38" width="16" height="12" rx="3" fill="#C8A256"/>
+          <rect x="36" y="38" width="16" height="3" rx="1" fill="#B8922A"/>
+          <!-- Ручка корзины -->
+          <path d="M40 38 Q44 32 48 38" stroke="#B8922A" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Полоски корзины -->
+          <line x1="40" y1="41" x2="40" y2="50" stroke="#B8922A" stroke-width="1"/>
+          <line x1="44" y1="41" x2="44" y2="50" stroke="#B8922A" stroke-width="1"/>
+          <line x1="48" y1="41" x2="48" y2="50" stroke="#B8922A" stroke-width="1"/>
+        </svg>
       </div>
+
     </div>
   </div>
 
+  <!-- Нижнее управление -->
   <div class="game-controls">
     <div class="dpad">
-      <button class="touch-btn tl" id="btn-0"
+      <button class="touch-btn" id="btn-0"
         ontouchstart="Wolf.moveTo(0);return false;" onclick="Wolf.moveTo(0)">
         <span class="touch-btn-icon">↖</span>
         <span class="touch-btn-label">ЛЕВО-ВЕРХ</span>
       </button>
-      <button class="touch-btn tr" id="btn-2"
+      <button class="touch-btn" id="btn-2"
         ontouchstart="Wolf.moveTo(2);return false;" onclick="Wolf.moveTo(2)">
         <span class="touch-btn-icon">↗</span>
         <span class="touch-btn-label">ПРАВО-ВЕРХ</span>
       </button>
-      <button class="touch-btn bl" id="btn-1"
+      <button class="touch-btn" id="btn-1"
         ontouchstart="Wolf.moveTo(1);return false;" onclick="Wolf.moveTo(1)">
         <span class="touch-btn-icon">↙</span>
         <span class="touch-btn-label">ЛЕВО-НИЗ</span>
       </button>
-      <button class="touch-btn br" id="btn-3"
+      <button class="touch-btn" id="btn-3"
         ontouchstart="Wolf.moveTo(3);return false;" onclick="Wolf.moveTo(3)">
         <span class="touch-btn-icon">↘</span>
         <span class="touch-btn-label">ПРАВО-НИЗ</span>
       </button>
     </div>
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
       <button class="pause-btn" onclick="Game.pause()">
         <span>⏸</span>
         <span class="pause-btn-label">ESC</span>
@@ -878,8 +580,8 @@ body {
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:center;width:136px;">
-      <div style="font-size:0.58rem;color:rgba(255,255,255,0.38);line-height:2;text-align:left;">
+    <div style="display:flex;align-items:center;justify-content:center;width:128px;">
+      <div style="font-size:0.55rem;color:rgba(255,255,255,0.35);line-height:2;text-align:left;">
         ← ↑ &nbsp;лево‑верх<br>
         ← ↓ &nbsp;лево‑низ<br>
         → ↑ &nbsp;право‑верх<br>
@@ -889,7 +591,7 @@ body {
   </div>
 </div>
 
-<!-- ══════════ ПАУЗА ══════════ -->
+<!-- ПАУЗА -->
 <div id="overlay-pause" class="overlay" style="display:none;">
   <div class="modal">
     <div class="modal-title-pause">⏸ ПАУЗА</div>
@@ -898,7 +600,7 @@ body {
   </div>
 </div>
 
-<!-- ══════════ GAME OVER ══════════ -->
+<!-- GAME OVER -->
 <div id="overlay-gameover" class="overlay" style="display:none;">
   <div class="modal">
     <div class="modal-title-go">💀 Игра окончена</div>
@@ -913,30 +615,27 @@ body {
 
 <script>
 // ════════════════════════════════════
-// SOUND — не изменено
+// SOUND
 // ════════════════════════════════════
 const Sound = (() => {
-  let ctx = null, on = true;
-  function ac() {
-    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-    return ctx;
-  }
-  function tone(freq, dur, type='sine', vol=0.28, delay=0) {
-    if (!on) return;
-    try {
-      const c=ac(), o=c.createOscillator(), g=c.createGain();
+  let ctx=null, on=true;
+  function ac(){ if(!ctx) ctx=new(window.AudioContext||window.webkitAudioContext)(); return ctx; }
+  function tone(freq,dur,type='sine',vol=0.28,delay=0){
+    if(!on) return;
+    try{
+      const c=ac(),o=c.createOscillator(),g=c.createGain();
       o.connect(g); g.connect(c.destination);
       o.type=type; o.frequency.value=freq;
       const t=c.currentTime+delay;
       g.gain.setValueAtTime(vol,t);
       g.gain.exponentialRampToValueAtTime(0.001,t+dur);
       o.start(t); o.stop(t+dur+0.01);
-    } catch(e){}
+    }catch(e){}
   }
-  function noise(dur,vol=0.18) {
-    if (!on) return;
-    try {
-      const c=ac(), buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
+  function noise(dur,vol=0.18){
+    if(!on) return;
+    try{
+      const c=ac(),buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
       const d=buf.getChannelData(0);
       for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
       const s=c.createBufferSource(); s.buffer=buf;
@@ -944,7 +643,7 @@ const Sound = (() => {
       g.gain.setValueAtTime(vol,c.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
       s.start();
-    } catch(e){}
+    }catch(e){}
   }
   return {
     playCapture(){ tone(900,0.08,'sine',0.3); tone(1200,0.1,'sine',0.2,0.07); },
@@ -957,39 +656,36 @@ const Sound = (() => {
 })();
 
 // ════════════════════════════════════
-// SCORE — не изменено
+// SCORE
 // ════════════════════════════════════
 const Score = (() => {
-  let score=0, misses=0, lastBonus=0;
+  let score=0,misses=0,lastBonus=0;
   let hs=parseInt(localStorage.getItem('wolfHS3')||'0');
-  function rScore() {
+  function rScore(){
     const el=document.getElementById('score-display');
     el.textContent=String(score).padStart(3,'0');
     el.classList.remove('bounce'); void el.offsetWidth; el.classList.add('bounce');
     setTimeout(()=>el.classList.remove('bounce'),300);
   }
-  function rLives() {
-    for(let i=0;i<3;i++)
-      document.getElementById('life-'+i).classList.toggle('lost', i>=(3-misses));
-  }
+  function rLives(){ for(let i=0;i<3;i++) document.getElementById('life-'+i).classList.toggle('lost',i>=(3-misses)); }
   return {
-    reset(){ score=0; misses=0; lastBonus=0; rScore(); rLives(); },
+    reset(){ score=0;misses=0;lastBonus=0;rScore();rLives(); },
     add(){
       score=Math.min(score+1,999); rScore();
       const b=Math.floor(score/100);
       if(b>lastBonus){
         lastBonus=b;
-        if(misses>0){ misses--; rLives(); }
+        if(misses>0){misses--;rLives();}
         Sound.playBonus();
         const m={1:'🎉 Отлично!',2:'🔥 Мастер!',5:'👑 Легенда!'};
         if(m[b]) showEaster(m[b]);
       }
     },
-    addMiss(){ misses++; rLives(); return misses; },
+    addMiss(){ misses++;rLives();return misses; },
     get score(){ return score; },
     get misses(){ return misses; },
     get hs(){ return hs; },
-    saveHs(){ if(score>hs){ hs=score; localStorage.setItem('wolfHS3',hs); return true; } return false; },
+    saveHs(){ if(score>hs){hs=score;localStorage.setItem('wolfHS3',hs);return true;} return false; },
     updateMenuHs(){ document.getElementById('menu-highscore').textContent=String(hs).padStart(3,'0'); }
   };
 })();
@@ -1002,7 +698,7 @@ function showEaster(msg){
 }
 
 // ════════════════════════════════════
-// UI — не изменено
+// UI
 // ════════════════════════════════════
 const UI = {
   showMenu(){
@@ -1027,42 +723,61 @@ const UI = {
 };
 
 // ════════════════════════════════════
-// GAME FIELD — не изменено
+// GAME FIELD
 // ════════════════════════════════════
 const GF = {
-  sz(){ const f=document.getElementById('game-field'); return {W:f.offsetWidth, H:f.offsetHeight}; },
-  eggPos(lane, step){
+  sz(){ const f=document.getElementById('game-field'); return {W:f.offsetWidth,H:f.offsetHeight}; },
+
+  // Жёлоба менее острые: яйца идут не к краям,
+  // а ближе к центру — угол пологий
+  eggPos(lane,step){
     const {W,H}=this.sz();
+    // sx/sy — старт (у курицы), ex/ey — конец (у волка)
+    // Сдвинули ex ближе к центру, чтобы угол был менее острым
     const c=[
-      {sx:W*.12,sy:H*.10,ex:W*.20,ey:H*.70},
-      {sx:W*.12,sy:H*.40,ex:W*.24,ey:H*.80},
-      {sx:W*.88,sy:H*.10,ex:W*.80,ey:H*.70},
-      {sx:W*.88,sy:H*.40,ex:W*.76,ey:H*.80},
+      {sx:W*.14,sy:H*.08,ex:W*.28,ey:H*.68}, // лево-верх
+      {sx:W*.14,sy:H*.38,ex:W*.30,ey:H*.80}, // лево-низ
+      {sx:W*.86,sy:H*.08,ex:W*.72,ey:H*.68}, // право-верх
+      {sx:W*.86,sy:H*.38,ex:W*.70,ey:H*.80}, // право-низ
     ][lane];
     const t=step/3;
-    return {x: c.sx+(c.ex-c.sx)*t-12, y: c.sy+(c.ey-c.sy)*t-12};
+    return {x:c.sx+(c.ex-c.sx)*t-12, y:c.sy+(c.ey-c.sy)*t-12};
   },
+
   chickenPos(lane){
     const {W,H}=this.sz();
-    return [{x:W*.04,y:H*.02},{x:W*.04,y:H*.33},{x:W*.83,y:H*.02},{x:W*.83,y:H*.33}][lane];
+    return [
+      {x:W*.04,y:H*.01},  // лево-верх
+      {x:W*.04,y:H*.31},  // лево-низ
+      {x:W*.82,y:H*.01},  // право-верх
+      {x:W*.82,y:H*.31},  // право-низ
+    ][lane];
   },
+
   wolfPos(pos){
     const {W,H}=this.sz();
-    return [{x:W*.11,y:H*.65},{x:W*.11,y:H*.76},{x:W*.70,y:H*.65},{x:W*.66,y:H*.76}][pos];
+    // Волк стоит в нижней трети, ближе к центру
+    return [
+      {x:W*.18,y:H*.60}, // лево-верх
+      {x:W*.18,y:H*.73}, // лево-низ
+      {x:W*.60,y:H*.60}, // право-верх
+      {x:W*.60,y:H*.73}, // право-низ
+    ][pos];
   },
+
   laneSeg(lane){
     const {W,H}=this.sz();
     return [
-      {sx:W*.15,sy:H*.12,ex:W*.23,ey:H*.68},
-      {sx:W*.15,sy:H*.43,ex:W*.27,ey:H*.77},
-      {sx:W*.85,sy:H*.12,ex:W*.77,ey:H*.68},
-      {sx:W*.85,sy:H*.43,ex:W*.73,ey:H*.77},
+      {sx:W*.17,sy:H*.10,ex:W*.30,ey:H*.66},
+      {sx:W*.17,sy:H*.40,ex:W*.33,ey:H*.78},
+      {sx:W*.83,sy:H*.10,ex:W*.70,ey:H*.66},
+      {sx:W*.83,sy:H*.40,ex:W*.67,ey:H*.78},
     ][lane];
   }
 };
 
 // ════════════════════════════════════
-// WOLF — не изменено
+// WOLF
 // ════════════════════════════════════
 const Wolf = (() => {
   let pos=0;
@@ -1074,7 +789,7 @@ const Wolf = (() => {
   function highlight(){
     for(let i=0;i<4;i++){
       const el=document.getElementById('btn-'+i);
-      if(el) el.classList.toggle('active-pos', i===pos);
+      if(el) el.classList.toggle('active-pos',i===pos);
     }
   }
   return {
@@ -1086,7 +801,7 @@ const Wolf = (() => {
 })();
 
 // ════════════════════════════════════
-// EGG — не изменено
+// EGG
 // ════════════════════════════════════
 class Egg {
   constructor(lane){
@@ -1100,10 +815,7 @@ class Egg {
   }
   render(){ const p=GF.eggPos(this.lane,this.step); this.el.style.left=p.x+'px'; this.el.style.top=p.y+'px'; }
   advance(){ this.step++; this.render(); }
-  catch(){
-    this.active=false; this.el.classList.add('caught');
-    setTimeout(()=>this.el.remove(),450);
-  }
+  catch(){ this.active=false; this.el.classList.add('caught'); setTimeout(()=>this.el.remove(),450); }
   break(){
     this.active=false; this.el.classList.add('broken');
     const s=document.createElement('div'); s.className='splat'; s.textContent='💥';
@@ -1116,13 +828,13 @@ class Egg {
 }
 
 // ════════════════════════════════════
-// MAIN GAME — не изменено
+// MAIN GAME
 // ════════════════════════════════════
 const Game = (() => {
-  let mode='A', eggs=[], occ=[false,false,false,false];
-  let running=false, paused=false, frameId=null;
-  let moveDelay=500, spawnDelay=2000;
-  let mt=0, st=0, lt=0;
+  let mode='A',eggs=[],occ=[false,false,false,false];
+  let running=false,paused=false,frameId=null;
+  let moveDelay=500,spawnDelay=2000;
+  let mt=0,st=0,lt=0;
 
   function calcSpeed(){
     const f=Math.pow(0.9,Math.floor(Score.score/50));
@@ -1138,7 +850,7 @@ const Game = (() => {
   function tickEggs(){
     for(let i=eggs.length-1;i>=0;i--){
       const e=eggs[i];
-      if(!e.active){ eggs.splice(i,1); continue; }
+      if(!e.active){eggs.splice(i,1);continue;}
       if(e.step>=3){
         if(Wolf.pos===e.lane){
           e.catch(); Score.add(); Sound.playCapture(); calcSpeed();
@@ -1148,7 +860,7 @@ const Game = (() => {
           field.classList.add('shake'); setTimeout(()=>field.classList.remove('shake'),340);
           field.classList.add('flash-red'); setTimeout(()=>field.classList.remove('flash-red'),420);
           occ[e.lane]=false; eggs.splice(i,1);
-          if(m>=3){ running=false; setTimeout(endGame,700); return; }
+          if(m>=3){running=false; setTimeout(endGame,700); return;}
           continue;
         }
         occ[e.lane]=false; eggs.splice(i,1);
@@ -1159,18 +871,15 @@ const Game = (() => {
     if(!running||paused) return;
     const dt=Math.min(ts-lt,200); lt=ts;
     mt+=dt; st+=dt;
-    if(st>=spawnDelay){ st=0; spawnEgg(); }
-    if(mt>=moveDelay) { mt=0; tickEggs(); }
+    if(st>=spawnDelay){st=0;spawnEgg();}
+    if(mt>=moveDelay) {mt=0;tickEggs();}
     if(running&&!paused) frameId=requestAnimationFrame(loop);
   }
   function clearEggs(){ eggs.forEach(e=>e.destroy()); eggs=[]; occ=[false,false,false,false]; }
+
   function layoutField(){
-    const field=document.getElementById('game-field');
-    const hh=document.querySelector('.game-header')?.offsetHeight||56;
-    const ch=document.querySelector('.game-controls')?.offsetHeight||70;
-    const lh=document.querySelector('.logo')?.offsetHeight||52;
-    const avail=window.innerHeight-hh-ch-lh-8;
-    field.style.height=Math.max(240,Math.min(avail,440))+'px';
+    // Поле теперь flex:1, высота управляется через CSS.
+    // Просто пересчитываем позиции элементов.
     for(let i=0;i<4;i++){
       const c=document.getElementById('chicken-'+i);
       const p=GF.chickenPos(i); c.style.left=p.x+'px'; c.style.top=p.y+'px';
@@ -1179,20 +888,23 @@ const Game = (() => {
     for(let i=0;i<4;i++) drawLane(i);
     Wolf.render();
   }
+
   function drawLane(lane){
     const s=GF.laneSeg(lane);
-    const dx=s.ex-s.sx, dy=s.ey-s.sy;
-    const len=Math.sqrt(dx*dx+dy*dy), angle=Math.atan2(dy,dx)*180/Math.PI;
+    const dx=s.ex-s.sx,dy=s.ey-s.sy;
+    const len=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx)*180/Math.PI;
     const el=document.createElement('div'); el.className='lane';
-    el.style.cssText=`width:${len}px;height:9px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
+    el.style.cssText=`width:${len}px;height:8px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
     document.getElementById('field-inner').appendChild(el);
   }
+
   function endGame(){
-    if(frameId){ cancelAnimationFrame(frameId); frameId=null; }
+    if(frameId){cancelAnimationFrame(frameId);frameId=null;}
     clearEggs(); Sound.playGameOver();
     const isNew=Score.saveHs();
     setTimeout(()=>UI.showGameOver(isNew),450);
   }
+
   return {
     start(m){
       mode=m; Score.reset(); Wolf.reset();
@@ -1212,7 +924,7 @@ const Game = (() => {
     pause(){
       if(!running||paused) return;
       paused=true;
-      if(frameId){ cancelAnimationFrame(frameId); frameId=null; }
+      if(frameId){cancelAnimationFrame(frameId);frameId=null;}
       UI.showPause();
     },
     resume(){
@@ -1221,7 +933,7 @@ const Game = (() => {
     },
     toMenu(){
       running=false; paused=false;
-      if(frameId){ cancelAnimationFrame(frameId); frameId=null; }
+      if(frameId){cancelAnimationFrame(frameId);frameId=null;}
       clearEggs();
       document.getElementById('overlay-gameover').style.display='none';
       document.getElementById('overlay-pause').style.display='none';
@@ -1231,20 +943,18 @@ const Game = (() => {
 })();
 
 // ════════════════════════════════════
-// KEYBOARD — не изменено
+// KEYBOARD — стрелки
 // ════════════════════════════════════
 {
-  let axisLeft=true, axisTop=true;
+  let axisLeft=true,axisTop=true;
   function calcPos(){
     if( axisLeft &&  axisTop) return 0;
     if( axisLeft && !axisTop) return 1;
     if(!axisLeft &&  axisTop) return 2;
     return 3;
   }
-  function gameIsActive(){
-    return document.getElementById('screen-game').classList.contains('active');
-  }
-  document.addEventListener('keydown', e => {
+  function gameIsActive(){ return document.getElementById('screen-game').classList.contains('active'); }
+  document.addEventListener('keydown',e=>{
     if(!gameIsActive()) return;
     switch(e.key){
       case 'ArrowLeft':  axisLeft=true;  Wolf.moveTo(calcPos()); e.preventDefault(); break;
@@ -1260,15 +970,11 @@ const Game = (() => {
 }
 
 // ════════════════════════════════════
-// RESIZE — не изменено
+// RESIZE
 // ════════════════════════════════════
-window.addEventListener('resize', ()=>{
+window.addEventListener('resize',()=>{
   if(!document.getElementById('screen-game').classList.contains('active')) return;
-  const field=document.getElementById('game-field');
-  const hh=document.querySelector('.game-header')?.offsetHeight||56;
-  const ch=document.querySelector('.game-controls')?.offsetHeight||70;
-  const lh=document.querySelector('.logo')?.offsetHeight||52;
-  field.style.height=Math.max(240,Math.min(window.innerHeight-hh-ch-lh-8,440))+'px';
+  // Поле растягивается CSS flex, просто пересчитываем позиции
   for(let i=0;i<4;i++){
     const c=document.getElementById('chicken-'+i);
     const p=GF.chickenPos(i); c.style.left=p.x+'px'; c.style.top=p.y+'px';
@@ -1276,10 +982,10 @@ window.addEventListener('resize', ()=>{
   document.querySelectorAll('.lane').forEach(l=>l.remove());
   for(let i=0;i<4;i++){
     const s=GF.laneSeg(i);
-    const dx=s.ex-s.sx, dy=s.ey-s.sy;
-    const len=Math.sqrt(dx*dx+dy*dy), angle=Math.atan2(dy,dx)*180/Math.PI;
+    const dx=s.ex-s.sx,dy=s.ey-s.sy;
+    const len=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx)*180/Math.PI;
     const el=document.createElement('div'); el.className='lane';
-    el.style.cssText=`width:${len}px;height:9px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
+    el.style.cssText=`width:${len}px;height:8px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
     document.getElementById('field-inner').appendChild(el);
   }
   Wolf.render();
