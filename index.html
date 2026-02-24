@@ -3,248 +3,394 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://api.bitrix24.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
 <title>Волк ловит яйца — Pavel Game Studio</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230066A1'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='%232FC7F7' text-anchor='middle'>P</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Битрикс24 API -->
+<script src="https://api.bitrix24.com/api/v1/"></script>
+
 <style>
+/* ════════════════════════════════════════════════
+   ПЕРЕМЕННЫЕ
+   ════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --lime:        #D4F01A;
-  --lime-hover:  #BFDA10;
-  --glass-nav:   rgba(255,255,255,0.18);
-  --glass-card:  rgba(255,255,255,0.12);
-  --glass-border:rgba(255,255,255,0.25);
-  --text-white:  #FFFFFF;
-  --text-dim:    rgba(255,255,255,0.7);
-  --text-muted:  rgba(255,255,255,0.45);
-  --error:       #FF3B5C;
-  --black:       #292426;
+  --lime:         #D4F01A;
+  --lime-hover:   #BFDA10;
+  --glass-nav:    rgba(255,255,255,0.18);
+  --glass-card:   rgba(255,255,255,0.12);
+  --glass-border: rgba(255,255,255,0.25);
+  --text-white:   #FFFFFF;
+  --text-dim:     rgba(255,255,255,0.70);
+  --text-muted:   rgba(255,255,255,0.45);
+  --error:        #FF3B5C;
+  --black:        #292426;
 }
 
-/* ── BASE ── */
-html { height: 100%; }
-body {
-  height: 100%;
+/* ════════════════════════════════════════════════
+   BASE — landscape-first
+   ════════════════════════════════════════════════ */
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
   color: var(--text-white);
-  user-select: none; -webkit-user-select: none;
-  display: flex; flex-direction: column; align-items: center;
-  overflow: hidden;
+  -webkit-user-select: none; user-select: none;
   background:
-    radial-gradient(ellipse 100% 70% at 50% 0%,   #1e75ff 0%, transparent 70%),
-    radial-gradient(ellipse 80%  60% at 100% 50%,  #0e4fd8 0%, transparent 65%),
-    radial-gradient(ellipse 70%  50% at 0%   80%,  #0840c0 0%, transparent 60%),
+    radial-gradient(ellipse 110% 80% at 50% 0%,   #1e75ff 0%, transparent 65%),
+    radial-gradient(ellipse 80%  70% at 100% 60%,  #0e4fd8 0%, transparent 65%),
+    radial-gradient(ellipse 70%  55% at 0%   90%,  #0840c0 0%, transparent 55%),
     #1565FF;
   background-attachment: fixed;
 }
 
-/* ── NAVBAR ── */
-.logo {
-  width: 100%; max-width: 560px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px;
-  background: var(--glass-nav);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-  border-radius: 0 0 14px 14px;
-  flex-shrink: 0; z-index: 10;
+/* ════════════════════════════════════════════════
+   ROTATE WARNING (portrait + narrow)
+   ════════════════════════════════════════════════ */
+#rotate-warning {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0D2847;
+  flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  text-align: center; padding: 24px;
 }
-.logo-text {
-  font-size: 1.25rem; font-weight: 800; color: var(--text-white);
-  letter-spacing: -0.02em; display: flex; align-items: center; gap: 6px;
+#rotate-warning .rw-icon { font-size: 4rem; animation: rotAnim 2s ease-in-out infinite; }
+@keyframes rotAnim {
+  0%,100% { transform: rotate(0deg); }
+  40%     { transform: rotate(90deg); }
+  60%     { transform: rotate(90deg); }
 }
-.logo-dot {
-  display: inline-block; width: 7px; height: 7px;
-  background: var(--lime); border-radius: 50%;
-  animation: dotBlink 2s ease-in-out infinite;
-}
-@keyframes dotBlink {
-  0%,100% { opacity:1; transform:scale(1); }
-  50%     { opacity:0.5; transform:scale(0.75); }
-}
-.logo-badge {
-  font-size: 0.6rem; font-weight: 800; color: var(--black);
-  background: var(--lime); padding: 3px 9px; border-radius: 999px;
-  letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
-  transition: all 0.2s;
-}
-.logo-badge:hover { background: var(--lime-hover); transform: scale(1.04); }
+#rotate-warning .rw-title { font-size: 1.3rem; font-weight: 800; color: var(--lime); }
+#rotate-warning .rw-sub   { font-size: 0.9rem; color: var(--text-dim); margin-top: 6px; }
 
-/* ── SCREENS ── */
+@media (orientation: portrait) and (max-width: 650px) {
+  #rotate-warning { display: flex; }
+  #game-container { display: none !important; }
+}
+
+/* ════════════════════════════════════════════════
+   GAME CONTAINER — весь экран
+   ════════════════════════════════════════════════ */
+#game-container {
+  width: 100%; height: 100%;
+  max-width: 1200px; max-height: 720px;
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+
+/* ════════════════════════════════════════════════
+   ЭКРАНЫ
+   ════════════════════════════════════════════════ */
 .screen {
-  display: none; position: relative; z-index: 1;
-  width: 100%; max-width: 560px;
-  padding: 0 14px 16px;
-  animation: fadeUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
-  /* Use available height after navbar */
-  flex: 1; min-height: 0; overflow-y: auto;
+  display: none;
+  width: 100%; height: 100%;
+  animation: fadeUp 0.35s cubic-bezier(0.22,1,0.36,1) both;
 }
 .screen.active { display: flex; flex-direction: column; }
 @keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px); }
-  to   { opacity:1; transform:translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── MENU ── */
-.menu-hero { text-align: center; padding: 18px 0 14px; }
+/* ════════════════════════════════════════════════
+   МЕНЮ — LANDSCAPE 2-колонки
+   ════════════════════════════════════════════════ */
+#screen-menu {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+/* Левая колонка меню */
+.menu-left {
+  width: 300px; flex-shrink: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 24px 20px 24px 28px;
+  border-right: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.05);
+}
+
+.menu-logo {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+}
+.menu-logo-text {
+  font-size: 1.6rem; font-weight: 900; color: var(--text-white); letter-spacing: -0.02em;
+}
+.logo-dot {
+  width: 8px; height: 8px; background: var(--lime); border-radius: 50%;
+  animation: dotBlink 2s ease-in-out infinite; flex-shrink: 0;
+}
+@keyframes dotBlink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.75)} }
+
 .menu-title {
-  font-size: clamp(1.5rem, 6vw, 2.4rem); font-weight: 900;
-  color: var(--text-white); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 6px;
+  font-size: 1.55rem; font-weight: 900; color: var(--text-white);
+  letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 6px;
 }
 .menu-subtitle {
-  font-size: 0.9rem; font-weight: 400;
-  color: var(--text-dim); margin-bottom: 18px; font-style: italic;
+  font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin-bottom: 26px;
 }
 
-/* ── BUTTONS ── */
+.menu-hs-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--glass-card); border: 1px solid var(--glass-border);
+  border-radius: 12px; padding: 10px 14px; margin-bottom: 20px;
+}
+.menu-hs-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; }
+.menu-hs-value { font-size: 1.8rem; font-weight: 900; color: var(--lime); line-height: 1; letter-spacing: -0.02em; margin-left: auto; text-shadow: 0 0 16px rgba(212,240,26,0.4); }
+
+/* Правая колонка меню */
+.menu-right {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; padding: 24px 28px 24px 24px; gap: 16px;
+}
+
+/* Нижняя строка меню */
+.menu-footer {
+  position: absolute; bottom: 10px; left: 0; right: 0;
+  text-align: center; font-size: 0.65rem; color: var(--text-muted);
+}
+
+/* Карточка управления */
+.ctrl-card {
+  background: var(--glass-card); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border); border-radius: 14px; padding: 16px 18px;
+  flex: 1;
+}
+.ctrl-card h3 { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; }
+.ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.ctrl-item { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-dim); }
+.key {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.35); border-radius: 6px;
+  font-size: 0.9rem; font-weight: 800; color: var(--text-white); flex-shrink: 0;
+}
+.ctrl-note { font-size: 0.7rem; color: var(--text-muted); line-height: 1.65; }
+
+/* ════════════════════════════════════════════════
+   КНОПКИ
+   ════════════════════════════════════════════════ */
 .btn {
-  display: block; width: 100%; border: none; border-radius: 999px;
-  font-family: 'Inter', sans-serif; font-weight: 800; cursor: pointer;
-  transition: all 0.2s ease; position: relative; overflow: hidden;
+  border: none; border-radius: 999px;
+  font-family: 'Inter', sans-serif; font-weight: 800;
+  cursor: pointer; transition: all 0.2s ease;
+  position: relative; overflow: hidden;
   letter-spacing: 0.04em; text-transform: uppercase;
 }
 .btn:active { transform: scale(0.95) !important; }
 
 .btn-lime {
-  padding: 14px 28px; font-size: 0.95rem; color: var(--black);
-  background: var(--lime); box-shadow: 0 4px 24px rgba(212,240,26,0.35);
-  margin-bottom: 10px;
+  display: block; width: 100%; padding: 14px 24px; font-size: 0.92rem;
+  color: var(--black); background: var(--lime);
+  box-shadow: 0 4px 20px rgba(212,240,26,0.35); margin-bottom: 10px;
 }
-.btn-lime:hover { background: var(--lime-hover); transform: scale(1.03); box-shadow: 0 8px 32px rgba(212,240,26,0.5); }
+.btn-lime:hover { background: var(--lime-hover); transform: scale(1.03); box-shadow: 0 8px 30px rgba(212,240,26,0.5); }
 
 .btn-glass {
-  padding: 12px 28px; font-size: 0.88rem; color: var(--text-white);
-  background: var(--glass-card); border: 1.5px solid var(--glass-border);
-  backdrop-filter: blur(12px); margin-bottom: 10px;
+  display: block; width: 100%; padding: 12px 24px; font-size: 0.85rem;
+  color: var(--text-white); background: var(--glass-card);
+  border: 1.5px solid var(--glass-border); backdrop-filter: blur(12px); margin-bottom: 10px;
 }
 .btn-glass:hover { background: rgba(255,255,255,0.2); transform: scale(1.02); }
 
 .btn-outline {
-  padding: 11px 24px; font-size: 0.82rem; color: var(--text-white);
-  background: transparent; border: 1.5px solid var(--glass-border); margin-bottom: 8px;
+  padding: 10px 22px; font-size: 0.82rem;
+  color: var(--text-white); background: transparent;
+  border: 1.5px solid var(--glass-border);
 }
 .btn-outline:hover { background: rgba(255,255,255,0.1); transform: scale(1.02); }
 
-/* ── CARDS ── */
-.card-glass {
-  background: var(--glass-card); backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
-  border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+.btn-icon {
+  padding: 8px 14px; font-size: 0.8rem;
+  color: var(--text-white); background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 10px;
+  display: flex; align-items: center; gap: 5px;
 }
-.hs-card { text-align: center; }
-.hs-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 4px; }
-.hs-value { font-size: 2.4rem; font-weight: 900; color: var(--lime); line-height: 1; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(212,240,26,0.4); }
+.btn-icon:hover { background: rgba(255,255,255,0.22); transform: scale(1.03); }
 
-.ctrl-card h3 { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
-.ctrl-section { font-size: 0.68rem; color: var(--text-dim); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 8px 0 6px; }
-.ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 4px; }
-.ctrl-item { display: flex; align-items: center; gap: 9px; font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
-.key {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; background: rgba(255,255,255,0.15);
-  border: 1.5px solid rgba(255,255,255,0.35); border-radius: 6px;
-  font-size: 0.95rem; font-weight: 800; color: var(--text-white); flex-shrink: 0;
-}
-.ctrl-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; line-height: 1.65; }
-.footer { text-align: center; color: var(--text-muted); font-size: 0.68rem; margin-top: 10px; }
+/* ════════════════════════════════════════════════
+   ИГРОВОЙ ЭКРАН — LANDSCAPE
+   ════════════════════════════════════════════════ */
+#screen-game { flex-direction: column; }
 
-/* ════════════════════════════════════════
-   ИГРОВОЙ ЭКРАН — всё в одном flex-column,
-   поле занимает оставшееся место
-   ════════════════════════════════════════ */
-#screen-game {
-  padding: 0; max-width: 560px;
-  /* критично: запрещаем скролл игрового экрана */
-  overflow: hidden;
-}
-
-/* Хедер */
+/* Верхняя панель */
 .game-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px;
-  background: var(--glass-nav); backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-  flex-shrink: 0;
+  padding: 6px 16px;
+  background: rgba(8,48,160,0.65);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  flex-shrink: 0; gap: 12px;
+  /* Тонкая лаймовая черта снизу */
+  box-shadow: 0 1px 0 rgba(212,240,26,0.2), 0 2px 12px rgba(0,0,0,0.2);
 }
-.score-label { font-size: 0.52rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; }
-.score-value {
-  font-size: 1.8rem; font-weight: 900; color: var(--lime); line-height: 1;
-  letter-spacing: -0.02em; text-shadow: 0 0 14px rgba(212,240,26,0.4);
-}
+.game-header-left   { display: flex; align-items: center; gap: 12px; }
+.game-header-center { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; }
+.game-header-right  { display: flex; align-items: center; gap: 8px; }
+
+.score-block { display: flex; align-items: baseline; gap: 6px; }
+.score-label { font-size: 0.58rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; }
+.score-value { font-size: 1.6rem; font-weight: 900; color: var(--lime); line-height: 1; letter-spacing: -0.02em; text-shadow: 0 0 12px rgba(212,240,26,0.4); }
 .score-value.bounce { animation: scoreBounce 0.28s ease; }
 @keyframes scoreBounce { 0%{transform:scale(1)} 45%{transform:scale(1.3)} 100%{transform:scale(1)} }
-.header-center { display: flex; align-items: center; gap: 7px; }
+
 .mode-badge {
   font-size: 0.58rem; font-weight: 800; padding: 3px 9px; border-radius: 999px;
-  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.28);
   color: var(--text-white); letter-spacing: 0.08em; text-transform: uppercase;
 }
-.sound-btn {
-  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 7px; color: var(--text-white); cursor: pointer;
-  padding: 4px 8px; font-size: 0.9rem; transition: all 0.2s; line-height: 1;
-}
-.sound-btn:hover { background: rgba(255,255,255,0.25); }
+.logo-small { font-size: 0.95rem; font-weight: 900; color: var(--text-white); letter-spacing: -0.01em; display: flex; align-items: center; gap: 4px; }
+.logo-small .logo-dot { width: 5px; height: 5px; }
+
 .lives-block { display: flex; gap: 5px; align-items: center; }
-.life-icon { font-size: 1.25rem; transition: all 0.3s ease; filter: drop-shadow(0 0 5px rgba(212,240,26,0.4)); }
-.life-icon.lost { filter: grayscale(1) opacity(0.2); transform: scale(0.72); }
+.life-icon { font-size: 1.15rem; transition: all 0.3s; filter: drop-shadow(0 0 5px rgba(212,240,26,0.4)); }
+.life-icon.lost { filter: grayscale(1) opacity(0.2); transform: scale(0.7); }
 
-/* ── GAME FIELD ── */
-#game-field {
-  position: relative; width: 100%;
-  background: linear-gradient(180deg, #1055e8 0%, #0e4fd8 60%, #0840c0 100%);
-  overflow: hidden;
-  border-left: 1px solid rgba(255,255,255,0.1);
-  border-right: 1px solid rgba(255,255,255,0.1);
-  /* flex-grow fills remaining space between header and controls */
+.sound-btn {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 7px; color: var(--text-white); cursor: pointer;
+  padding: 4px 8px; font-size: 0.85rem; transition: all 0.2s; line-height: 1;
+}
+.sound-btn:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Центральная зона: D-pad | ПОЛЕ | D-pad ── */
+.game-main {
   flex: 1; min-height: 0;
+  display: flex; flex-direction: row; align-items: stretch;
 }
 
-/* Декоративный орб */
+/* D-PAD — вертикальный, по бокам */
+.dpad-panel {
+  width: 88px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 6px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  gap: 5px;
+}
+#dpad-right { border-right: none; border-left: 1px solid rgba(255,255,255,0.08); }
+
+.dpad-label {
+  font-size: 0.44rem; font-weight: 800; color: var(--text-muted);
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;
+}
+.dpad-row { display: flex; gap: 4px; }
+
+.dp-btn {
+  width: 46px; height: 40px;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.2); border-radius: 10px;
+  font-size: 1rem; cursor: pointer; transition: all 0.16s;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.9);
+  /* Лёгкое внутреннее свечение */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.2);
+}
+.dp-btn:active { transform: scale(0.83) !important; background: rgba(255,255,255,0.25); }
+.dp-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.45); transform: scale(1.06); }
+.dp-btn.active-pos {
+  background: rgba(212,240,26,0.22);
+  border-color: rgba(212,240,26,0.8);
+  color: var(--lime);
+  box-shadow: 0 0 12px rgba(212,240,26,0.4), inset 0 1px 0 rgba(212,240,26,0.3);
+  filter: brightness(1.15);
+}
+
+/* Игровое поле */
+#game-field {
+  flex: 1; min-width: 0; position: relative;
+  /* Более глубокий, богатый синий — как ночное небо */
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(0,40,120,0.6) 0%, transparent 70%),
+    linear-gradient(180deg, #0d47d1 0%, #0b3db8 40%, #0930a0 100%);
+  overflow: hidden;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Тонкая горизонтальная разделительная линия между верхним и нижним рядами */
+#game-field::after {
+  content: '';
+  position: absolute;
+  left: 5%; right: 5%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.1) 80%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Декор — свечение снизу где стоит волк */
 #game-field::before {
   content: ''; position: absolute;
-  width: 220px; height: 220px; border-radius: 50%;
-  left: 50%; top: 48%; transform: translate(-50%,-50%);
-  background: radial-gradient(circle, rgba(47,199,247,0.14) 0%, transparent 70%);
+  width: 60%; height: 35%;
+  left: 20%; bottom: 0;
+  background: radial-gradient(ellipse, rgba(47,199,247,0.08) 0%, transparent 70%);
   pointer-events: none; z-index: 0;
   animation: orb 6s ease-in-out infinite alternate;
 }
-@keyframes orb { 0%{transform:translate(-50%,-50%)scale(1);opacity:0.7} 100%{transform:translate(-50%,-50%)scale(1.12);opacity:1} }
+@keyframes orb { 0%{opacity:0.5;} 100%{opacity:1;} }
 
 .field-inner { position: relative; width: 100%; height: 100%; }
 
 /* Курицы */
 .chicken {
-  position: absolute; font-size: 1.7rem; z-index: 10;
-  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35));
+  position: absolute; font-size: 1.8rem; z-index: 10;
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));
   transition: transform 0.15s;
+  line-height: 1;
 }
 .chicken.lay { animation: chickenLay 0.38s ease; }
 @keyframes chickenLay {
-  0%{transform:scale(1)rotate(0)} 35%{transform:scale(1.3)rotate(-16deg)}
+  0%{transform:scale(1)rotate(0)} 35%{transform:scale(1.3)rotate(-15deg)}
   70%{transform:scale(1.1)rotate(8deg)} 100%{transform:scale(1)rotate(0)}
 }
 
-/* Жёлоба — плавные, не острые */
+/* Жёлоба */
 .lane {
   position: absolute; transform-origin: 0 50%;
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.32);
-  border-radius: 4px;
-  box-shadow: 0 0 8px rgba(255,255,255,0.08);
+  border-radius: 6px;
+  /* Матовое стекло с градиентом */
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.35) 0%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0.25) 100%);
+  border-top: 1px solid rgba(255,255,255,0.55);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+/* Подпись жёлоба */
+.lane-label {
+  position: absolute;
+  z-index: 25;
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  white-space: nowrap;
 }
 
 /* Яйца */
 .egg {
-  position: absolute; font-size: 1.35rem; z-index: 20; pointer-events: none;
+  position: absolute; font-size: 1.5rem; z-index: 20; pointer-events: none;
   transition: left 0.38s cubic-bezier(0.4,0,0.2,1), top 0.38s cubic-bezier(0.4,0,0.2,1);
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+  line-height: 1;
 }
 .egg.caught { animation: eggCaught 0.42s ease forwards; }
 @keyframes eggCaught {
   0%  { transform:scale(1); opacity:1; }
-  40% { transform:scale(1.8); filter:drop-shadow(0 0 18px rgba(212,240,26,0.95))brightness(2.5); }
+  40% { transform:scale(1.8); filter:drop-shadow(0 0 18px rgba(212,240,26,0.95))brightness(2.4); }
   100%{ transform:scale(0); opacity:0; }
 }
 .egg.broken { animation: eggBroken 0.5s ease forwards; }
@@ -254,13 +400,12 @@ body {
   100%{ transform:scale(0.4)rotate(50deg); opacity:0; }
 }
 
-/* ══ ВОЛК «НУ, ПОГОДИ» ══
-   SVG-персонаж: серый волк в белой рубашке
-   с корзиной. Рисуем inline через data-uri.   */
+/* Волк SVG */
 #wolf {
   position: absolute; z-index: 30; pointer-events: none;
   transition: left 0.13s cubic-bezier(0.34,1.4,0.64,1), top 0.13s cubic-bezier(0.34,1.4,0.64,1);
-  width: 52px; /* ширина SVG */
+  width: 54px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
 }
 
 /* Splat */
@@ -268,61 +413,11 @@ body {
   position: absolute; font-size: 1rem; z-index: 15; pointer-events: none;
   animation: splatAnim 0.9s ease forwards;
 }
-@keyframes splatAnim {
-  0%  { transform:scale(0.4); opacity:1; }
-  35% { transform:scale(1.5); opacity:1; }
-  100%{ transform:scale(1.1); opacity:0; }
-}
+@keyframes splatAnim { 0%{transform:scale(0.4);opacity:1} 35%{transform:scale(1.5);opacity:1} 100%{transform:scale(1.1);opacity:0} }
 
-/* ── CONTROLS ── */
-.game-controls {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px;
-  background: var(--glass-nav); backdrop-filter: blur(20px);
-  border-top: 1px solid var(--glass-border);
-  gap: 6px; flex-shrink: 0;
-}
-
-.dpad { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-
-.touch-btn {
-  width: 56px; height: 50px;
-  background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.25); border-radius: 11px;
-  font-size: 1.25rem; cursor: pointer; transition: all 0.18s ease;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  color: var(--text-white); gap: 1px; backdrop-filter: blur(8px);
-}
-.touch-btn:active { transform: scale(0.84) !important; }
-.touch-btn:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.5); transform: scale(1.05); }
-.touch-btn.active-pos {
-  background: rgba(212,240,26,0.2); border-color: var(--lime);
-  box-shadow: 0 0 16px rgba(212,240,26,0.5); filter: brightness(1.2);
-}
-.touch-btn-icon  { font-size: 1.2rem; line-height: 1; }
-.touch-btn-label { font-size: 0.42rem; color: rgba(255,255,255,0.58); font-weight: 700; letter-spacing: 0.04em; }
-
-.pause-btn {
-  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.25);
-  border-radius: 11px; color: var(--text-white); cursor: pointer;
-  padding: 0 10px; font-size: 1rem; transition: all 0.18s; height: 50px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  backdrop-filter: blur(8px);
-}
-.pause-btn:hover { background: rgba(255,255,255,0.22); }
-.pause-btn-label { font-size: 0.42rem; color: rgba(255,255,255,0.45); font-weight: 700; letter-spacing: 0.05em; }
-
-.kb-hint { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.kb-row  { display: flex; gap: 2px; }
-.kb-key {
-  width: 23px; height: 23px; background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.28); border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.78rem; color: rgba(255,255,255,0.75); font-weight: 700;
-}
-.kb-hint-label { font-size: 0.44rem; color: rgba(255,255,255,0.38); margin-top: 2px; text-align: center; letter-spacing: 0.06em; font-weight: 700; }
-
-/* ── OVERLAYS ── */
+/* ════════════════════════════════════════════════
+   ОВЕРЛЕИ — горизонтальные модалы
+   ════════════════════════════════════════════════ */
 .overlay {
   position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
@@ -335,33 +430,42 @@ body {
 .modal {
   background: rgba(255,255,255,0.14);
   backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border: 1.5px solid rgba(255,255,255,0.3); border-radius: 22px;
-  padding: 30px 28px; text-align: center; max-width: 340px; width: 90%;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+  border: 1.5px solid rgba(255,255,255,0.28); border-radius: 20px;
+  padding: 28px 36px; text-align: center;
+  /* Широкий горизонтальный модал */
+  max-width: 560px; width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
   animation: modalPop 0.42s cubic-bezier(0.34,1.56,0.64,1);
 }
-@keyframes modalPop { from{transform:scale(0.8)translateY(16px);opacity:0} to{transform:scale(1)translateY(0);opacity:1} }
+@keyframes modalPop { from{transform:scale(0.82)translateY(12px);opacity:0} to{transform:scale(1)translateY(0);opacity:1} }
 
-.modal-title-go   { font-size: 1.4rem; font-weight: 900; color: var(--text-white); margin-bottom: 6px; letter-spacing: -0.01em; }
-.modal-title-pause{ font-size: 2rem; font-weight: 900; color: var(--text-white); margin-bottom: 22px; letter-spacing: -0.02em; }
-.modal-score-label{ font-size: 0.62rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 4px; }
-.modal-score {
-  font-size: 3.2rem; font-weight: 900; color: var(--lime);
-  text-shadow: 0 0 24px rgba(212,240,26,0.5); letter-spacing: -0.03em; line-height: 1; margin-bottom: 8px;
-  animation: countIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
-}
+.modal-title-go { font-size: 1.35rem; font-weight: 900; color: var(--text-white); margin-bottom: 6px; }
+.modal-title-pause { font-size: 1.8rem; font-weight: 900; color: var(--text-white); margin-bottom: 18px; letter-spacing: -0.02em; }
+
+.modal-score-row { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin-bottom: 16px; }
+.modal-score-label { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; }
+.modal-score { font-size: 3rem; font-weight: 900; color: var(--lime); text-shadow: 0 0 20px rgba(212,240,26,0.5); letter-spacing: -0.03em; line-height: 1; animation: countIn 0.5s cubic-bezier(0.34,1.4,0.64,1); }
 @keyframes countIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
-.modal-hs { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 20px; }
+
+.modal-hs { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 18px; }
+
 .new-record-badge {
-  font-size: 0.82rem; font-weight: 800; color: var(--black); background: var(--lime);
-  border-radius: 999px; padding: 4px 16px; margin-bottom: 12px; display: inline-block;
-  text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 0.8rem; font-weight: 800; color: var(--black);
+  background: var(--lime); border-radius: 999px; padding: 4px 16px; margin-bottom: 12px;
+  display: inline-block; text-transform: uppercase; letter-spacing: 0.06em;
   animation: recordPop 0.5s 0.2s both cubic-bezier(0.34,1.56,0.64,1), limePulse 1.5s 0.7s ease-in-out infinite alternate;
 }
 @keyframes recordPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
 @keyframes limePulse { 0%{box-shadow:0 0 8px rgba(212,240,26,0.4)} 100%{box-shadow:0 0 22px rgba(212,240,26,0.85)} }
 
-/* ── АНИМАЦИИ ── */
+/* Кнопки в ряд в модале */
+.modal-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.modal-btns .btn-lime   { display: inline-block; width: auto; padding: 12px 28px; margin-bottom: 0; }
+.modal-btns .btn-outline{ display: inline-block; }
+
+/* ════════════════════════════════════════════════
+   АНИМАЦИИ
+   ════════════════════════════════════════════════ */
 .shake { animation: shake 0.32s ease; }
 @keyframes shake {
   0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)}
@@ -369,234 +473,229 @@ body {
 }
 .flash-red { animation: flashRed 0.42s ease; }
 @keyframes flashRed {
-  0%,100%{ box-shadow:none }
-  50%{ box-shadow:inset 0 0 70px rgba(255,59,92,0.55), 0 0 40px rgba(255,59,92,0.2) }
+  0%,100%{box-shadow:none}
+  50%{box-shadow:inset 0 0 70px rgba(255,59,92,0.55),0 0 40px rgba(255,59,92,0.2)}
 }
 .easter-msg {
-  position: fixed; top: 38%; left: 50%; transform: translate(-50%,-50%);
-  font-size: 1.7rem; font-weight: 900; color: var(--lime);
-  text-shadow: 0 0 30px rgba(212,240,26,0.85); z-index: 300;
+  position: fixed; top: 35%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 1.6rem; font-weight: 900; color: var(--lime);
+  text-shadow: 0 0 28px rgba(212,240,26,0.85); z-index: 300;
   animation: easterPop 2.1s ease forwards; pointer-events: none;
 }
 @keyframes easterPop {
-  0%  { transform:translate(-50%,-50%)scale(0); opacity:0; }
-  18% { transform:translate(-50%,-60%)scale(1.15); opacity:1; }
-  72% { transform:translate(-50%,-60%)scale(1); opacity:1; }
-  100%{ transform:translate(-50%,-80%)scale(0.8); opacity:0; }
+  0%  {transform:translate(-50%,-50%)scale(0);opacity:0}
+  18% {transform:translate(-50%,-60%)scale(1.15);opacity:1}
+  72% {transform:translate(-50%,-60%)scale(1);opacity:1}
+  100%{transform:translate(-50%,-80%)scale(0.8);opacity:0}
 }
 
-/* ── RESPONSIVE ── */
-@media (hover:hover) and (pointer:fine) {
-  .dpad { opacity:0.6; transition:opacity 0.2s; }
-  .dpad:hover { opacity:1; }
+/* ════════════════════════════════════════════════
+   АДАПТИВ — desktop wide
+   ════════════════════════════════════════════════ */
+@media (min-width: 900px) {
+  .dpad-panel { width: 100px; }
+  .dp-btn { width: 52px; height: 44px; font-size: 1.2rem; }
 }
-@media (hover:none) and (pointer:coarse) {
-  .kb-hint { display:none; }
-  .dpad { opacity:1; }
+@media (max-height: 520px) {
+  .game-header { padding: 4px 14px; }
+  .score-value { font-size: 1.3rem; }
+  .dp-btn { width: 40px; height: 36px; font-size: 1rem; }
+  .dpad-panel { width: 76px; }
 }
-/* Очень маленькие экраны */
-@media (max-height: 640px) {
-  .game-header { padding: 5px 12px; }
-  .score-value { font-size: 1.5rem; }
-  .game-controls { padding: 5px 10px; }
-  .touch-btn { width: 50px; height: 44px; font-size: 1.1rem; }
-  .pause-btn { height: 44px; }
-  .logo { padding: 5px 12px; }
-  .logo-text { font-size: 1.1rem; }
-}
-@media (max-width: 380px) {
-  .touch-btn { width: 48px; height: 44px; font-size: 1.1rem; }
-  .logo-text { font-size: 1.05rem; }
-}
+
+/* Центрирование всего контента по высоте если высота > max */
+body { display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
-<div class="logo">
-  <div class="logo-text">Pavel<span class="logo-dot"></span></div>
-  <div class="logo-badge" onclick="typeof UI !== 'undefined' && UI.showMenu()">Game Studio</div>
+<!-- ══ ROTATE WARNING ══ -->
+<div id="rotate-warning">
+  <div class="rw-icon">📱</div>
+  <div>
+    <div class="rw-title">Поверните устройство</div>
+    <div class="rw-sub">Игра оптимизирована для горизонтального экрана</div>
+  </div>
 </div>
 
-<!-- ══ МЕНЮ ══ -->
-<div id="screen-menu" class="screen active">
-  <div class="menu-hero">
-    <div class="menu-title">Волк ловит яйца</div>
-    <div class="menu-subtitle">Классическая аркада · Ну, погоди!</div>
-  </div>
+<!-- ══ GAME CONTAINER ══ -->
+<div id="game-container">
 
-  <button class="btn btn-lime"  onclick="Game.start('A')">Игра A — Нормально</button>
-  <button class="btn btn-glass" onclick="Game.start('B')">Игра B — Сложно ⚡</button>
+  <!-- ════ МЕНЮ ════ -->
+  <div id="screen-menu" class="screen active" style="position:relative;">
 
-  <div class="card-glass hs-card">
-    <div class="hs-label">🏆 Рекорд</div>
-    <div class="hs-value" id="menu-highscore">000</div>
-  </div>
-
-  <div class="card-glass ctrl-card">
-    <h3>⌨ Управление</h3>
-    <div class="ctrl-section">💻 Компьютер — стрелки</div>
-    <div class="ctrl-grid">
-      <div class="ctrl-item"><span class="key">←</span> Левая сторона</div>
-      <div class="ctrl-item"><span class="key">→</span> Правая сторона</div>
-      <div class="ctrl-item"><span class="key">↑</span> Верхний жёлоб</div>
-      <div class="ctrl-item"><span class="key">↓</span> Нижний жёлоб</div>
-    </div>
-    <div class="ctrl-note">← + ↑ = лево-верх · ← + ↓ = лево-низ<br>→ + ↑ = право-верх · → + ↓ = право-низ</div>
-    <div class="ctrl-section" style="margin-top:12px;">📱 Мобильный — кнопки ↖ ↙ ↗ ↘</div>
-    <div class="ctrl-note">4 кнопки = 4 позиции волка</div>
-  </div>
-
-  <div class="footer">© 2025 Pavel Game Studio</div>
-</div>
-
-<!-- ══ ИГРА ══ -->
-<div id="screen-game" class="screen">
-
-  <!-- Хедер -->
-  <div class="game-header">
-    <div class="score-block">
-      <div class="score-label">Счёт</div>
-      <div class="score-value" id="score-display">000</div>
-    </div>
-    <div class="header-center">
-      <span class="mode-badge" id="mode-display">Режим A</span>
-      <button class="sound-btn" id="sound-toggle" onclick="Sound.toggle()">🔊</button>
-    </div>
-    <div class="lives-block">
-      <span class="life-icon" id="life-0">🥚</span>
-      <span class="life-icon" id="life-1">🥚</span>
-      <span class="life-icon" id="life-2">🥚</span>
-    </div>
-  </div>
-
-  <!-- Поле -->
-  <div id="game-field">
-    <div class="field-inner" id="field-inner">
-      <div class="chicken" id="chicken-0">🐔</div>
-      <div class="chicken" id="chicken-1">🐔</div>
-      <div class="chicken" id="chicken-2">🐔</div>
-      <div class="chicken" id="chicken-3">🐔</div>
-
-      <!-- Волк «Ну, погоди» — SVG персонаж -->
-      <div id="wolf">
-        <svg width="52" height="68" viewBox="0 0 52 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Тело — белая рубашка -->
-          <rect x="13" y="30" width="26" height="28" rx="5" fill="#FFFFFF"/>
-          <!-- Полосы на рубашке — серые -->
-          <rect x="13" y="36" width="26" height="3" rx="1" fill="#D0D0D0"/>
-          <rect x="13" y="43" width="26" height="3" rx="1" fill="#D0D0D0"/>
-          <!-- Штаны — тёмно-синие -->
-          <rect x="13" y="52" width="11" height="16" rx="3" fill="#1a3a8a"/>
-          <rect x="28" y="52" width="11" height="16" rx="3" fill="#1a3a8a"/>
-          <!-- Ноги / обувь — чёрные -->
-          <rect x="11" y="62" width="14" height="6" rx="3" fill="#222"/>
-          <rect x="27" y="62" width="14" height="6" rx="3" fill="#222"/>
-          <!-- Шея -->
-          <rect x="22" y="25" width="8" height="8" rx="2" fill="#8A8A8A"/>
-          <!-- Голова — серая -->
-          <ellipse cx="26" cy="18" rx="14" ry="13" fill="#8A8A8A"/>
-          <!-- Морда (светлее) -->
-          <ellipse cx="26" cy="22" rx="8" ry="6" fill="#AFAFAF"/>
-          <!-- Уши -->
-          <polygon points="12,8 8,0 18,6" fill="#8A8A8A"/>
-          <polygon points="40,8 44,0 34,6" fill="#8A8A8A"/>
-          <!-- Уши внутри (розовые) -->
-          <polygon points="13,7 10,2 17,6" fill="#D08080"/>
-          <polygon points="39,7 42,2 35,6" fill="#D08080"/>
-          <!-- Глаза -->
-          <ellipse cx="20" cy="16" rx="3.5" ry="3.5" fill="white"/>
-          <ellipse cx="32" cy="16" rx="3.5" ry="3.5" fill="white"/>
-          <circle cx="21" cy="16" r="2" fill="#222"/>
-          <circle cx="33" cy="16" r="2" fill="#222"/>
-          <!-- Блеск глаз -->
-          <circle cx="22" cy="15" r="0.8" fill="white"/>
-          <circle cx="34" cy="15" r="0.8" fill="white"/>
-          <!-- Нос -->
-          <ellipse cx="26" cy="22" rx="3" ry="2" fill="#555"/>
-          <!-- Рот — ухмылка -->
-          <path d="M21 26 Q26 30 31 26" stroke="#555" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <!-- Сигарета -->
-          <rect x="30" y="25" width="12" height="3" rx="1.5" fill="#f5f5dc"/>
-          <rect x="40" y="25" width="4" height="3" rx="1" fill="#FF6633"/>
-          <!-- Дымок -->
-          <path d="M42 24 Q44 20 42 17 Q40 14 42 11" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <!-- Руки -->
-          <rect x="2" y="32" width="13" height="7" rx="3.5" fill="#8A8A8A"/>
-          <rect x="37" y="32" width="13" height="7" rx="3.5" fill="#8A8A8A"/>
-          <!-- Корзина — правая рука держит -->
-          <rect x="36" y="38" width="16" height="12" rx="3" fill="#C8A256"/>
-          <rect x="36" y="38" width="16" height="3" rx="1" fill="#B8922A"/>
-          <!-- Ручка корзины -->
-          <path d="M40 38 Q44 32 48 38" stroke="#B8922A" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <!-- Полоски корзины -->
-          <line x1="40" y1="41" x2="40" y2="50" stroke="#B8922A" stroke-width="1"/>
-          <line x1="44" y1="41" x2="44" y2="50" stroke="#B8922A" stroke-width="1"/>
-          <line x1="48" y1="41" x2="48" y2="50" stroke="#B8922A" stroke-width="1"/>
-        </svg>
+    <!-- Левая колонка -->
+    <div class="menu-left">
+      <div class="menu-logo">
+        <div class="menu-logo-text">Pavel</div>
+        <div class="logo-dot"></div>
       </div>
+      <div class="menu-title">Волк ловит яйца</div>
+      <div class="menu-subtitle">Классическая советская аркада · Ну, погоди!</div>
 
-    </div>
-  </div>
-
-  <!-- Нижнее управление -->
-  <div class="game-controls">
-    <div class="dpad">
-      <button class="touch-btn" id="btn-0"
-        ontouchstart="Wolf.moveTo(0);return false;" onclick="Wolf.moveTo(0)">
-        <span class="touch-btn-icon">↖</span>
-        <span class="touch-btn-label">ЛЕВО-ВЕРХ</span>
-      </button>
-      <button class="touch-btn" id="btn-2"
-        ontouchstart="Wolf.moveTo(2);return false;" onclick="Wolf.moveTo(2)">
-        <span class="touch-btn-icon">↗</span>
-        <span class="touch-btn-label">ПРАВО-ВЕРХ</span>
-      </button>
-      <button class="touch-btn" id="btn-1"
-        ontouchstart="Wolf.moveTo(1);return false;" onclick="Wolf.moveTo(1)">
-        <span class="touch-btn-icon">↙</span>
-        <span class="touch-btn-label">ЛЕВО-НИЗ</span>
-      </button>
-      <button class="touch-btn" id="btn-3"
-        ontouchstart="Wolf.moveTo(3);return false;" onclick="Wolf.moveTo(3)">
-        <span class="touch-btn-icon">↘</span>
-        <span class="touch-btn-label">ПРАВО-НИЗ</span>
-      </button>
-    </div>
-
-    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
-      <button class="pause-btn" onclick="Game.pause()">
-        <span>⏸</span>
-        <span class="pause-btn-label">ESC</span>
-      </button>
-      <div class="kb-hint">
-        <div class="kb-row"><div class="kb-key">↑</div></div>
-        <div class="kb-row">
-          <div class="kb-key">←</div>
-          <div class="kb-key">↓</div>
-          <div class="kb-key">→</div>
+      <div class="menu-hs-row">
+        <div>
+          <div class="menu-hs-label">🏆 Рекорд</div>
         </div>
-        <div class="kb-hint-label">СТРЕЛКИ</div>
+        <div class="menu-hs-value" id="menu-highscore">000</div>
+      </div>
+
+      <button class="btn btn-lime" onclick="Game.start('A')">Игра A — Нормально</button>
+      <button class="btn btn-glass" onclick="Game.start('B')">⚡ Игра B — Сложно</button>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="menu-right">
+      <div class="ctrl-card">
+        <h3>⌨ Управление</h3>
+        <div style="margin-bottom:10px;font-size:0.7rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">💻 Клавиатура</div>
+        <div class="ctrl-grid">
+          <div class="ctrl-item"><span class="key">←</span> Левая сторона</div>
+          <div class="ctrl-item"><span class="key">→</span> Правая сторона</div>
+          <div class="ctrl-item"><span class="key">↑</span> Верхний жёлоб</div>
+          <div class="ctrl-item"><span class="key">↓</span> Нижний жёлоб</div>
+        </div>
+        <div class="ctrl-note" style="margin-top:8px;">
+          ← + ↑ = лево-верх &nbsp;·&nbsp; ← + ↓ = лево-низ<br>
+          → + ↑ = право-верх &nbsp;·&nbsp; → + ↓ = право-низ<br>
+          <span style="margin-top:4px;display:block;">ESC / Пробел = пауза</span>
+        </div>
+        <div style="margin-top:14px;font-size:0.7rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">📱 Мобильный</div>
+        <div class="ctrl-note" style="margin-top:4px;">D-pad кнопки слева и справа от поля.<br>Оба D-pad'а дублируют управление.</div>
+      </div>
+
+      <div style="text-align:center;font-size:0.65rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">
+        © 2025 Pavel Game Studio
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:center;width:128px;">
-      <div style="font-size:0.55rem;color:rgba(255,255,255,0.35);line-height:2;text-align:left;">
-        ← ↑ &nbsp;лево‑верх<br>
-        ← ↓ &nbsp;лево‑низ<br>
-        → ↑ &nbsp;право‑верх<br>
-        → ↓ &nbsp;право‑низ
+  </div><!-- /screen-menu -->
+
+  <!-- ════ ИГРА ════ -->
+  <div id="screen-game" class="screen">
+
+    <!-- Верхняя панель -->
+    <div class="game-header">
+      <div class="game-header-left">
+        <div class="logo-small">Pavel<span class="logo-dot"></span></div>
+        <div class="score-block">
+          <div class="score-label">Счёт</div>
+          <div class="score-value" id="score-display">000</div>
+        </div>
+      </div>
+      <div class="game-header-center">
+        <span class="mode-badge" id="mode-display">Режим A</span>
+        <div class="lives-block">
+          <span class="life-icon" id="life-0">🥚</span>
+          <span class="life-icon" id="life-1">🥚</span>
+          <span class="life-icon" id="life-2">🥚</span>
+        </div>
+      </div>
+      <div class="game-header-right">
+        <button class="sound-btn" id="sound-toggle" onclick="Sound.toggle()">🔊</button>
+        <button class="btn btn-icon" onclick="openFullscreen()">⛶</button>
+        <button class="btn btn-icon" onclick="Game.pause()">⏸ Пауза</button>
       </div>
     </div>
-  </div>
-</div>
+
+    <!-- Центральная зона: D-pad | Поле | D-pad -->
+    <div class="game-main">
+
+      <!-- Левый D-pad -->
+      <div class="dpad-panel" id="dpad-left">
+        <div class="dpad-label">Лево</div>
+        <!-- ↑ центр -->
+        <div class="dpad-row">
+          <button class="dp-btn" id="btn-up-L" ontouchstart="dpadUp();return false;" onclick="dpadUp()">↑</button>
+        </div>
+        <!-- ← (лево) -->
+        <div class="dpad-row">
+          <button class="dp-btn" id="btn-left" ontouchstart="dpadLeft();return false;" onclick="dpadLeft()">←</button>
+        </div>
+        <!-- ↓ центр -->
+        <div class="dpad-row">
+          <button class="dp-btn" id="btn-dn-L" ontouchstart="dpadDown();return false;" onclick="dpadDown()">↓</button>
+        </div>
+      </div>
+
+      <!-- Поле -->
+      <div id="game-field">
+        <div class="field-inner" id="field-inner">
+          <!-- Зональные подписи -->
+          <div style="position:absolute;left:50%;top:6%;transform:translateX(-50%);z-index:2;font-size:0.5rem;font-weight:800;color:rgba(212,240,26,0.7);letter-spacing:0.2em;text-transform:uppercase;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,0.6);">▲ ВЕРХНИЙ РЯД</div>
+          <div style="position:absolute;left:50%;top:52%;transform:translateX(-50%);z-index:2;font-size:0.5rem;font-weight:800;color:rgba(255,255,255,0.45);letter-spacing:0.2em;text-transform:uppercase;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,0.6);">▼ НИЖНИЙ РЯД</div>
+          <div class="chicken" id="chicken-0">🐔</div>
+          <div class="chicken" id="chicken-1">🐔</div>
+          <div class="chicken" id="chicken-2">🐔</div>
+          <div class="chicken" id="chicken-3">🐔</div>
+          <!-- Волк «Ну, погоди» SVG -->
+          <div id="wolf">
+            <svg width="48" height="64" viewBox="0 0 52 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="13" y="30" width="26" height="28" rx="5" fill="#FFFFFF"/>
+              <rect x="13" y="36" width="26" height="3" rx="1" fill="#D0D0D0"/>
+              <rect x="13" y="43" width="26" height="3" rx="1" fill="#D0D0D0"/>
+              <rect x="13" y="52" width="11" height="16" rx="3" fill="#1a3a8a"/>
+              <rect x="28" y="52" width="11" height="16" rx="3" fill="#1a3a8a"/>
+              <rect x="11" y="62" width="14" height="6" rx="3" fill="#222"/>
+              <rect x="27" y="62" width="14" height="6" rx="3" fill="#222"/>
+              <rect x="22" y="25" width="8" height="8" rx="2" fill="#8A8A8A"/>
+              <ellipse cx="26" cy="18" rx="14" ry="13" fill="#8A8A8A"/>
+              <ellipse cx="26" cy="22" rx="8" ry="6" fill="#AFAFAF"/>
+              <polygon points="12,8 8,0 18,6" fill="#8A8A8A"/>
+              <polygon points="40,8 44,0 34,6" fill="#8A8A8A"/>
+              <polygon points="13,7 10,2 17,6" fill="#D08080"/>
+              <polygon points="39,7 42,2 35,6" fill="#D08080"/>
+              <ellipse cx="20" cy="16" rx="3.5" ry="3.5" fill="white"/>
+              <ellipse cx="32" cy="16" rx="3.5" ry="3.5" fill="white"/>
+              <circle cx="21" cy="16" r="2" fill="#222"/>
+              <circle cx="33" cy="16" r="2" fill="#222"/>
+              <circle cx="22" cy="15" r="0.8" fill="white"/>
+              <circle cx="34" cy="15" r="0.8" fill="white"/>
+              <ellipse cx="26" cy="22" rx="3" ry="2" fill="#555"/>
+              <path d="M21 26 Q26 30 31 26" stroke="#555" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <rect x="30" y="25" width="12" height="3" rx="1.5" fill="#f5f5dc"/>
+              <rect x="40" y="25" width="4" height="3" rx="1" fill="#FF6633"/>
+              <path d="M42 24 Q44 20 42 17 Q40 14 42 11" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <rect x="2" y="32" width="13" height="7" rx="3.5" fill="#8A8A8A"/>
+              <rect x="37" y="32" width="13" height="7" rx="3.5" fill="#8A8A8A"/>
+              <rect x="36" y="38" width="16" height="12" rx="3" fill="#C8A256"/>
+              <rect x="36" y="38" width="16" height="3" rx="1" fill="#B8922A"/>
+              <path d="M40 38 Q44 32 48 38" stroke="#B8922A" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <line x1="40" y1="41" x2="40" y2="50" stroke="#B8922A" stroke-width="1"/>
+              <line x1="44" y1="41" x2="44" y2="50" stroke="#B8922A" stroke-width="1"/>
+              <line x1="48" y1="41" x2="48" y2="50" stroke="#B8922A" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Правый D-pad -->
+      <div class="dpad-panel" id="dpad-right">
+        <div class="dpad-label">Право</div>
+        <div class="dpad-row">
+          <button class="dp-btn" id="btn-up-R" ontouchstart="dpadUp();return false;" onclick="dpadUp()">↑</button>
+        </div>
+        <div class="dpad-row">
+          <button class="dp-btn" id="btn-right" ontouchstart="dpadRight();return false;" onclick="dpadRight()">→</button>
+        </div>
+        <div class="dpad-row">
+          <button class="dp-btn" id="btn-dn-R" ontouchstart="dpadDown();return false;" onclick="dpadDown()">↓</button>
+        </div>
+      </div>
+
+    </div><!-- /game-main -->
+  </div><!-- /screen-game -->
+
+</div><!-- /game-container -->
 
 <!-- ПАУЗА -->
 <div id="overlay-pause" class="overlay" style="display:none;">
   <div class="modal">
     <div class="modal-title-pause">⏸ ПАУЗА</div>
-    <button class="btn btn-lime"    style="margin-bottom:10px;" onclick="Game.resume()">▶ Продолжить</button>
-    <button class="btn btn-outline" onclick="Game.toMenu()">🏠 Выход в меню</button>
+    <div class="modal-btns">
+      <button class="btn btn-lime" onclick="Game.resume()">▶ Продолжить</button>
+      <button class="btn btn-outline" onclick="Game.toMenu()">🏠 Меню</button>
+    </div>
   </div>
 </div>
 
@@ -604,19 +703,89 @@ body {
 <div id="overlay-gameover" class="overlay" style="display:none;">
   <div class="modal">
     <div class="modal-title-go">💀 Игра окончена</div>
-    <div class="modal-score-label">Финальный счёт</div>
-    <div class="modal-score" id="go-score">000</div>
+    <div class="modal-score-row">
+      <div class="modal-score-label">Счёт</div>
+      <div class="modal-score" id="go-score">000</div>
+    </div>
     <div class="new-record-badge" id="go-newrecord" style="display:none">🌟 Новый рекорд!</div>
     <div class="modal-hs" id="go-highscore">Рекорд: 000</div>
-    <button class="btn btn-lime"    style="margin-bottom:10px;" onclick="Game.restart()">🔄 Играть снова</button>
-    <button class="btn btn-outline" onclick="Game.toMenu()">🏠 Меню</button>
+    <div class="modal-btns">
+      <button class="btn btn-lime" onclick="Game.restart()">🔄 Играть снова</button>
+      <button class="btn btn-outline" onclick="Game.toMenu()">🏠 Меню</button>
+    </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════
-// SOUND
-// ════════════════════════════════════
+/* ══════════════════════════════════════════════
+   ОШИБКИ — не ломают Б24
+   ══════════════════════════════════════════════ */
+window.onerror = function(msg,url,line){ console.error('Game error:',msg,url,line); return true; };
+
+/* ══════════════════════════════════════════════
+   БИТРИКС24 — детекция и инициализация
+   ══════════════════════════════════════════════ */
+const isB24 = typeof BX24 !== 'undefined';
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (isB24) {
+    try {
+      BX24.init(function() {
+        initGame();
+        adjustFrameSize();
+      });
+    } catch(e) { initGame(); }
+  } else {
+    initGame();
+  }
+});
+
+function adjustFrameSize() {
+  if (!isB24) return;
+  try { BX24.resizeWindow(1050, 640, function(){}); } catch(e){}
+}
+
+function openFullscreen() {
+  if (isB24) {
+    try { BX24.openApplication({}); } catch(e) {}
+  } else {
+    try {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    } catch(e){}
+  }
+}
+
+// Resize в Б24 — пересчитываем поле
+if (isB24) {
+  window.addEventListener('resize', () => {
+    if (document.getElementById('screen-game').classList.contains('active')) {
+      layoutField();
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════
+   РЕКОРДЫ — localStorage + BX24.userOption
+   ══════════════════════════════════════════════ */
+function saveHighscore(score) {
+  localStorage.setItem('wolfHS4', score);
+  if (isB24) { try { BX24.userOption.set('wolfHS4', score); } catch(e){} }
+}
+function loadHighscore() {
+  const local = parseInt(localStorage.getItem('wolfHS4') || '0');
+  if (isB24) {
+    try {
+      const b24val = BX24.userOption.get('wolfHS4');
+      return Math.max(local, parseInt(b24val) || 0);
+    } catch(e) {}
+  }
+  return local;
+}
+
+/* ══════════════════════════════════════════════
+   SOUND
+   ══════════════════════════════════════════════ */
 const Sound = (() => {
   let ctx=null, on=true;
   function ac(){ if(!ctx) ctx=new(window.AudioContext||window.webkitAudioContext)(); return ctx; }
@@ -655,12 +824,12 @@ const Sound = (() => {
   };
 })();
 
-// ════════════════════════════════════
-// SCORE
-// ════════════════════════════════════
+/* ══════════════════════════════════════════════
+   SCORE
+   ══════════════════════════════════════════════ */
 const Score = (() => {
   let score=0,misses=0,lastBonus=0;
-  let hs=parseInt(localStorage.getItem('wolfHS3')||'0');
+  let hs=0; // загрузим в initGame
   function rScore(){
     const el=document.getElementById('score-display');
     el.textContent=String(score).padStart(3,'0');
@@ -669,6 +838,7 @@ const Score = (() => {
   }
   function rLives(){ for(let i=0;i<3;i++) document.getElementById('life-'+i).classList.toggle('lost',i>=(3-misses)); }
   return {
+    init(){ hs=loadHighscore(); },
     reset(){ score=0;misses=0;lastBonus=0;rScore();rLives(); },
     add(){
       score=Math.min(score+1,999); rScore();
@@ -684,8 +854,11 @@ const Score = (() => {
     addMiss(){ misses++;rLives();return misses; },
     get score(){ return score; },
     get misses(){ return misses; },
-    get hs(){ return hs; },
-    saveHs(){ if(score>hs){hs=score;localStorage.setItem('wolfHS3',hs);return true;} return false; },
+    get hs()   { return hs; },
+    saveHs(){
+      if(score>hs){ hs=score; saveHighscore(hs); return true; }
+      return false;
+    },
     updateMenuHs(){ document.getElementById('menu-highscore').textContent=String(hs).padStart(3,'0'); }
   };
 })();
@@ -697,9 +870,9 @@ function showEaster(msg){
   setTimeout(()=>el.remove(),2200);
 }
 
-// ════════════════════════════════════
-// UI
-// ════════════════════════════════════
+/* ══════════════════════════════════════════════
+   UI
+   ══════════════════════════════════════════════ */
 const UI = {
   showMenu(){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -722,87 +895,151 @@ const UI = {
   }
 };
 
-// ════════════════════════════════════
-// GAME FIELD
-// ════════════════════════════════════
+/* ══════════════════════════════════════════════
+   GAME FIELD — landscape координаты
+   Волк стоит снизу по центру.
+   4 курицы вверху (веером).
+   Жёлоба идут от краёв к центру.
+   ══════════════════════════════════════════════ */
 const GF = {
   sz(){ const f=document.getElementById('game-field'); return {W:f.offsetWidth,H:f.offsetHeight}; },
 
-  // Жёлоба менее острые: яйца идут не к краям,
-  // а ближе к центру — угол пологий
-  eggPos(lane,step){
+  /*
+   * НОВАЯ КОНЦЕПЦИЯ ПОЛЯ (landscape):
+   *
+   *  🐔──────────────────▶  ◀──────────────────🐔   (ВЕРХНИЙ РЯД)
+   *  lane 0 (лево)              lane 2 (право)
+   *
+   *  🐔──────────────────▶  ◀──────────────────🐔   (НИЖНИЙ РЯД)
+   *  lane 1 (лево)              lane 3 (право)
+   *
+   *           🐺 (4 позиции по центру внизу)
+   *
+   * Жёлоба почти горизонтальные — лёгкий наклон ~5°.
+   * Яйца скатываются от края к центру.
+   * Волк стоит внизу — 4 позиции соответствуют 4 жёлобам.
+   *
+   * lane 0 = верхний левый  → волк поз 0
+   * lane 1 = нижний левый   → волк поз 1
+   * lane 2 = верхний правый → волк поз 2
+   * lane 3 = нижний правый  → волк поз 3
+   */
+
+  // Яйца скользят вдоль жёлоба к волку
+  eggPos(lane, step){
     const {W,H}=this.sz();
-    // sx/sy — старт (у курицы), ex/ey — конец (у волка)
-    // Сдвинули ex ближе к центру, чтобы угол был менее острым
+    // Жёлоба горизонтальные: y почти не меняется (лёгкий спуск)
+    // Левые — идут слева направо к центру
+    // Правые — идут справа налево к центру
     const c=[
-      {sx:W*.14,sy:H*.08,ex:W*.28,ey:H*.68}, // лево-верх
-      {sx:W*.14,sy:H*.38,ex:W*.30,ey:H*.80}, // лево-низ
-      {sx:W*.86,sy:H*.08,ex:W*.72,ey:H*.68}, // право-верх
-      {sx:W*.86,sy:H*.38,ex:W*.70,ey:H*.80}, // право-низ
+      // lane 0: лево-верх.  Курица слева, яйцо едет вправо, чуть вниз
+      {sx:W*.04, sy:H*.22, ex:W*.46, ey:H*.30},
+      // lane 1: лево-низ.   Курица слева, яйцо едет вправо, чуть вниз
+      {sx:W*.04, sy:H*.52, ex:W*.46, ey:H*.60},
+      // lane 2: право-верх. Курица справа, яйцо едет влево, чуть вниз
+      {sx:W*.96, sy:H*.22, ex:W*.54, ey:H*.30},
+      // lane 3: право-низ.  Курица справа, яйцо едет влево, чуть вниз
+      {sx:W*.96, sy:H*.52, ex:W*.54, ey:H*.60},
     ][lane];
-    const t=step/3;
-    return {x:c.sx+(c.ex-c.sx)*t-12, y:c.sy+(c.ey-c.sy)*t-12};
+    const t = step / 3;
+    return {x: c.sx + (c.ex - c.sx)*t - 12, y: c.sy + (c.ey - c.sy)*t - 12};
   },
 
+  // Курицы — по краям, на уровне своего жёлоба
   chickenPos(lane){
     const {W,H}=this.sz();
     return [
-      {x:W*.04,y:H*.01},  // лево-верх
-      {x:W*.04,y:H*.31},  // лево-низ
-      {x:W*.82,y:H*.01},  // право-верх
-      {x:W*.82,y:H*.31},  // право-низ
+      {x: W*.01, y: H*.14},  // 0: лево-верх
+      {x: W*.01, y: H*.44},  // 1: лево-низ
+      {x: W*.88, y: H*.14},  // 2: право-верх
+      {x: W*.88, y: H*.44},  // 3: право-низ
     ][lane];
   },
 
+  // Волк — 4 позиции по центру внизу, каждая под своим жёлобом
   wolfPos(pos){
     const {W,H}=this.sz();
-    // Волк стоит в нижней трети, ближе к центру
     return [
-      {x:W*.18,y:H*.60}, // лево-верх
-      {x:W*.18,y:H*.73}, // лево-низ
-      {x:W*.60,y:H*.60}, // право-верх
-      {x:W*.60,y:H*.73}, // право-низ
+      {x: W*.41, y: H*.26},  // 0: под лево-верхним
+      {x: W*.41, y: H*.56},  // 1: под лево-нижним
+      {x: W*.50, y: H*.26},  // 2: под право-верхним
+      {x: W*.50, y: H*.56},  // 3: под право-нижним
     ][pos];
   },
 
+  // Жёлоба — почти горизонтальные полосы
   laneSeg(lane){
     const {W,H}=this.sz();
     return [
-      {sx:W*.17,sy:H*.10,ex:W*.30,ey:H*.66},
-      {sx:W*.17,sy:H*.40,ex:W*.33,ey:H*.78},
-      {sx:W*.83,sy:H*.10,ex:W*.70,ey:H*.66},
-      {sx:W*.83,sy:H*.40,ex:W*.67,ey:H*.78},
+      // 0: лево-верх — горизонтальный, лёгкий наклон вправо-вниз
+      {sx: W*.06, sy: H*.25, ex: W*.47, ey: H*.30},
+      // 1: лево-низ
+      {sx: W*.06, sy: H*.55, ex: W*.47, ey: H*.60},
+      // 2: право-верх — зеркально
+      {sx: W*.94, sy: H*.25, ex: W*.53, ey: H*.30},
+      // 3: право-низ
+      {sx: W*.94, sy: H*.55, ex: W*.53, ey: H*.60},
     ][lane];
   }
 };
 
-// ════════════════════════════════════
-// WOLF
-// ════════════════════════════════════
+/* ══════════════════════════════════════════════
+   WOLF
+   ══════════════════════════════════════════════ */
 const Wolf = (() => {
   let pos=0;
+  // Дублирующие оси для двух D-pad'ов
+  let axisLeft=true, axisTop=true;
+
   function place(){
     const p=GF.wolfPos(pos);
     const el=document.getElementById('wolf');
     el.style.left=p.x+'px'; el.style.top=p.y+'px';
   }
-  function highlight(){
-    for(let i=0;i<4;i++){
-      const el=document.getElementById('btn-'+i);
-      if(el) el.classList.toggle('active-pos',i===pos);
+  function highlightDpad(){
+    // Подсвечиваем активные направления
+    const allDpBtns=['btn-left','btn-right','btn-up-L','btn-dn-L','btn-up-R','btn-dn-R'];
+    allDpBtns.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.classList.remove('active-pos');
+    });
+    if(axisLeft){ const el=document.getElementById('btn-left'); if(el) el.classList.add('active-pos'); }
+    else        { const el=document.getElementById('btn-right'); if(el) el.classList.add('active-pos'); }
+    if(axisTop){ 
+      ['btn-up-L','btn-up-R'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('active-pos'); });
+    } else {
+      ['btn-dn-L','btn-dn-R'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('active-pos'); });
     }
   }
+  function calcPos(){
+    if( axisLeft &&  axisTop) return 0;
+    if( axisLeft && !axisTop) return 1;
+    if(!axisLeft &&  axisTop) return 2;
+    return 3;
+  }
+  function update(){ pos=calcPos(); place(); highlightDpad(); Sound.playClick(); }
+
   return {
     get pos(){ return pos; },
-    moveTo(p){ pos=p; place(); highlight(); Sound.playClick(); },
-    render(){ place(); highlight(); },
-    reset(){ pos=0; place(); highlight(); }
+    setLeft(){ axisLeft=true;  update(); },
+    setRight(){ axisLeft=false; update(); },
+    setUp()  { axisTop=true;   update(); },
+    setDown(){ axisTop=false;  update(); },
+    render() { place(); highlightDpad(); },
+    reset()  { axisLeft=true; axisTop=true; pos=0; place(); highlightDpad(); }
   };
 })();
 
-// ════════════════════════════════════
-// EGG
-// ════════════════════════════════════
+// D-pad функции — оба D-pad'а вызывают одно и то же
+function dpadLeft()  { if(gameIsActive()) Wolf.setLeft(); }
+function dpadRight() { if(gameIsActive()) Wolf.setRight(); }
+function dpadUp()    { if(gameIsActive()) Wolf.setUp(); }
+function dpadDown()  { if(gameIsActive()) Wolf.setDown(); }
+function gameIsActive(){ return document.getElementById('screen-game').classList.contains('active'); }
+
+/* ══════════════════════════════════════════════
+   EGG
+   ══════════════════════════════════════════════ */
 class Egg {
   constructor(lane){
     this.lane=lane; this.step=0; this.active=true;
@@ -827,9 +1064,9 @@ class Egg {
   destroy(){ this.active=false; if(this.el.parentNode) this.el.remove(); }
 }
 
-// ════════════════════════════════════
-// MAIN GAME
-// ════════════════════════════════════
+/* ══════════════════════════════════════════════
+   MAIN GAME
+   ══════════════════════════════════════════════ */
 const Game = (() => {
   let mode='A',eggs=[],occ=[false,false,false,false];
   let running=false,paused=false,frameId=null;
@@ -877,34 +1114,6 @@ const Game = (() => {
   }
   function clearEggs(){ eggs.forEach(e=>e.destroy()); eggs=[]; occ=[false,false,false,false]; }
 
-  function layoutField(){
-    // Поле теперь flex:1, высота управляется через CSS.
-    // Просто пересчитываем позиции элементов.
-    for(let i=0;i<4;i++){
-      const c=document.getElementById('chicken-'+i);
-      const p=GF.chickenPos(i); c.style.left=p.x+'px'; c.style.top=p.y+'px';
-    }
-    document.querySelectorAll('.lane').forEach(l=>l.remove());
-    for(let i=0;i<4;i++) drawLane(i);
-    Wolf.render();
-  }
-
-  function drawLane(lane){
-    const s=GF.laneSeg(lane);
-    const dx=s.ex-s.sx,dy=s.ey-s.sy;
-    const len=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx)*180/Math.PI;
-    const el=document.createElement('div'); el.className='lane';
-    el.style.cssText=`width:${len}px;height:8px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
-    document.getElementById('field-inner').appendChild(el);
-  }
-
-  function endGame(){
-    if(frameId){cancelAnimationFrame(frameId);frameId=null;}
-    clearEggs(); Sound.playGameOver();
-    const isNew=Score.saveHs();
-    setTimeout(()=>UI.showGameOver(isNew),450);
-  }
-
   return {
     start(m){
       mode=m; Score.reset(); Wolf.reset();
@@ -940,58 +1149,203 @@ const Game = (() => {
       UI.showMenu();
     }
   };
+
+  function endGame(){
+    if(frameId){cancelAnimationFrame(frameId);frameId=null;}
+    clearEggs(); Sound.playGameOver();
+    const isNew=Score.saveHs();
+    setTimeout(()=>UI.showGameOver(isNew),450);
+  }
+  // expose endGame через closure
+  Game._endGame = endGame; // недостижимо — исправим ниже
 })();
 
-// ════════════════════════════════════
-// KEYBOARD — стрелки
-// ════════════════════════════════════
-{
-  let axisLeft=true,axisTop=true;
-  function calcPos(){
-    if( axisLeft &&  axisTop) return 0;
-    if( axisLeft && !axisTop) return 1;
-    if(!axisLeft &&  axisTop) return 2;
-    return 3;
-  }
-  function gameIsActive(){ return document.getElementById('screen-game').classList.contains('active'); }
-  document.addEventListener('keydown',e=>{
-    if(!gameIsActive()) return;
-    switch(e.key){
-      case 'ArrowLeft':  axisLeft=true;  Wolf.moveTo(calcPos()); e.preventDefault(); break;
-      case 'ArrowRight': axisLeft=false; Wolf.moveTo(calcPos()); e.preventDefault(); break;
-      case 'ArrowUp':    axisTop=true;   Wolf.moveTo(calcPos()); e.preventDefault(); break;
-      case 'ArrowDown':  axisTop=false;  Wolf.moveTo(calcPos()); e.preventDefault(); break;
-      case 'Escape': case ' ':
-        if(document.getElementById('overlay-pause').style.display==='flex') Game.resume();
-        else Game.pause();
-        e.preventDefault(); break;
-    }
-  });
+/* Исправляем endGame — выносим из closure */
+function _endGame(){
+  // вызывается из tickEggs через Game._end
+  Game._end();
 }
 
-// ════════════════════════════════════
-// RESIZE
-// ════════════════════════════════════
-window.addEventListener('resize',()=>{
-  if(!document.getElementById('screen-game').classList.contains('active')) return;
-  // Поле растягивается CSS flex, просто пересчитываем позиции
+/* ══════════════════════════════════════════════
+   LAYOUT FIELD
+   ══════════════════════════════════════════════ */
+function layoutField(){
   for(let i=0;i<4;i++){
     const c=document.getElementById('chicken-'+i);
     const p=GF.chickenPos(i); c.style.left=p.x+'px'; c.style.top=p.y+'px';
   }
   document.querySelectorAll('.lane').forEach(l=>l.remove());
-  for(let i=0;i<4;i++){
-    const s=GF.laneSeg(i);
-    const dx=s.ex-s.sx,dy=s.ey-s.sy;
-    const len=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx)*180/Math.PI;
-    const el=document.createElement('div'); el.className='lane';
-    el.style.cssText=`width:${len}px;height:8px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
-    document.getElementById('field-inner').appendChild(el);
-  }
+  document.querySelectorAll('.lane-label').forEach(l=>l.remove());
+  for(let i=0;i<4;i++) drawLane(i);
   Wolf.render();
+}
+
+function drawLane(lane){
+  const s=GF.laneSeg(lane);
+  const dx=s.ex-s.sx,dy=s.ey-s.sy;
+  const len=Math.sqrt(dx*dx+dy*dy),angle=Math.atan2(dy,dx)*180/Math.PI;
+
+  // Жёлоб — толще, хорошо виден
+  const el=document.createElement('div');
+  el.className='lane';
+  el.style.cssText=`width:${len}px;height:11px;left:${s.sx}px;top:${s.sy}px;transform:rotate(${angle}deg)`;
+  document.getElementById('field-inner').appendChild(el);
+
+  // Подпись над жёлобом
+  const labels=['↑ ВЕРХ','↓ НИЗ','↑ ВЕРХ','↓ НИЗ'];
+  const colors=['rgba(212,240,26,0.85)','rgba(255,255,255,0.55)','rgba(212,240,26,0.85)','rgba(255,255,255,0.55)'];
+  const lbl=document.createElement('div');
+  lbl.className='lane-label';
+  // Ставим подпись в середине жёлоба
+  const mx=(s.sx+s.ex)/2 - 18;
+  const my=Math.min(s.sy,s.ey) - 16;
+  lbl.style.cssText=`left:${mx}px;top:${my}px;color:${colors[lane]};`;
+  lbl.textContent=labels[lane];
+  document.getElementById('field-inner').appendChild(lbl);
+}
+
+function recalculateGameField(){
+  if(!document.getElementById('screen-game').classList.contains('active')) return;
+  document.querySelectorAll('.lane-label').forEach(l=>l.remove());
+  layoutField();
+}
+
+/* ══════════════════════════════════════════════
+   KEYBOARD — стрелки
+   ══════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(!gameIsActive()) return;
+  switch(e.key){
+    case 'ArrowLeft':  Wolf.setLeft();  e.preventDefault(); break;
+    case 'ArrowRight': Wolf.setRight(); e.preventDefault(); break;
+    case 'ArrowUp':    Wolf.setUp();    e.preventDefault(); break;
+    case 'ArrowDown':  Wolf.setDown();  e.preventDefault(); break;
+    case 'Escape': case ' ':
+      if(document.getElementById('overlay-pause').style.display==='flex') Game.resume();
+      else Game.pause();
+      e.preventDefault(); break;
+  }
 });
 
-Score.updateMenuHs();
+/* ══════════════════════════════════════════════
+   RESIZE
+   ══════════════════════════════════════════════ */
+window.addEventListener('resize',()=>{ recalculateGameField(); });
+
+/* ══════════════════════════════════════════════
+   INIT — вызывается из DOMContentLoaded / BX24.init
+   ══════════════════════════════════════════════ */
+function initGame(){
+  Score.init();
+  Score.updateMenuHs();
+}
+
+// Фолбэк — если DOMContentLoaded уже сработал (BX24 не загрузился)
+if(document.readyState==='complete'||document.readyState==='interactive'){
+  if(!isB24){ initGame(); }
+}
 </script>
+
+<script>
+/* ══════════════════════════════════════════════
+   ПАТЧ: endGame внутри Game-closure недоступен снаружи.
+   Перепишем Game через нормальный объект.
+   ══════════════════════════════════════════════ */
+
+// Перезаписываем Game правильной версией
+(function(){
+  let mode='A',eggs2=[],occ2=[false,false,false,false];
+  let running2=false,paused2=false,frameId2=null;
+  let moveDelay2=500,spawnDelay2=2000;
+  let mt2=0,st2=0,lt2=0;
+
+  function calcSpeed2(){
+    const f=Math.pow(0.9,Math.floor(Score.score/50));
+    moveDelay2 =Math.max(mode==='A'?200:150, Math.round((mode==='A'?500:380)*f));
+    spawnDelay2=Math.max(mode==='A'?600:400, Math.round((mode==='A'?2000:1400)*f));
+  }
+  function spawnEgg2(){
+    const free=[0,1,2,3].filter(i=>!occ2[i]);
+    if(!free.length) return;
+    const lane=free[Math.floor(Math.random()*free.length)];
+    occ2[lane]=true; eggs2.push(new Egg(lane));
+  }
+  function clearEggs2(){ eggs2.forEach(e=>e.destroy()); eggs2=[]; occ2=[false,false,false,false]; }
+
+  function endGame2(){
+    if(frameId2){cancelAnimationFrame(frameId2);frameId2=null;}
+    clearEggs2(); Sound.playGameOver();
+    const isNew=Score.saveHs();
+    setTimeout(()=>UI.showGameOver(isNew),450);
+  }
+
+  function tickEggs2(){
+    for(let i=eggs2.length-1;i>=0;i--){
+      const e=eggs2[i];
+      if(!e.active){eggs2.splice(i,1);continue;}
+      if(e.step>=3){
+        if(Wolf.pos===e.lane){
+          e.catch(); Score.add(); Sound.playCapture(); calcSpeed2();
+        } else {
+          e.break(); const m=Score.addMiss(); Sound.playMiss();
+          const field=document.getElementById('game-field');
+          field.classList.add('shake'); setTimeout(()=>field.classList.remove('shake'),340);
+          field.classList.add('flash-red'); setTimeout(()=>field.classList.remove('flash-red'),420);
+          occ2[e.lane]=false; eggs2.splice(i,1);
+          if(m>=3){running2=false; setTimeout(endGame2,700); return;}
+          continue;
+        }
+        occ2[e.lane]=false; eggs2.splice(i,1);
+      } else { e.advance(); }
+    }
+  }
+  function loop2(ts){
+    if(!running2||paused2) return;
+    const dt=Math.min(ts-lt2,200); lt2=ts;
+    mt2+=dt; st2+=dt;
+    if(st2>=spawnDelay2){st2=0;spawnEgg2();}
+    if(mt2>=moveDelay2) {mt2=0;tickEggs2();}
+    if(running2&&!paused2) frameId2=requestAnimationFrame(loop2);
+  }
+
+  // Перезаписываем глобальный Game
+  window.Game = {
+    start(m){
+      mode=m; Score.reset(); Wolf.reset();
+      document.getElementById('mode-display').textContent='Режим '+m;
+      UI.showGame();
+      setTimeout(()=>{
+        layoutField(); calcSpeed2(); clearEggs2();
+        running2=true; paused2=false;
+        mt2=0; st2=spawnDelay2*0.4; lt2=performance.now();
+        frameId2=requestAnimationFrame(loop2);
+      },120);
+    },
+    restart(){
+      document.getElementById('overlay-gameover').style.display='none';
+      window.Game.start(mode);
+    },
+    pause(){
+      if(!running2||paused2) return;
+      paused2=true;
+      if(frameId2){cancelAnimationFrame(frameId2);frameId2=null;}
+      UI.showPause();
+    },
+    resume(){
+      paused2=false; UI.hidePause();
+      lt2=performance.now(); frameId2=requestAnimationFrame(loop2);
+    },
+    toMenu(){
+      running2=false; paused2=false;
+      if(frameId2){cancelAnimationFrame(frameId2);frameId2=null;}
+      clearEggs2();
+      document.getElementById('overlay-gameover').style.display='none';
+      document.getElementById('overlay-pause').style.display='none';
+      UI.showMenu();
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
